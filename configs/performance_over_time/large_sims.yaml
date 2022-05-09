@@ -1,0 +1,46 @@
+meta:
+  purpose : "large_sims" 
+  save_dir : "./data/results/arxiv_prep/large_sims/"
+
+data :
+  sim:
+    n_categories : 300
+    n_features : 600
+    n_samples : 70000 
+    seed : 0 
+    include_intercept : True  
+    link : 1 # MULTI_LOGIT 
+    scale_for_predictive_categories : 2.0
+    pct_training : 0.8 
+    
+holdout_performance:
+  advi:
+    n_iterations : 1000
+    seed : 0 
+    lrs :
+      - 0.001 
+      - 0.01 
+      - 0.1
+    link2 : 2 # SOFTMAX 
+
+  cavi_probit:
+    n_iterations: 1000
+
+  cavi_logit:
+      n_iterations: null 
+
+  nuts : 
+    n_warmup : 30
+    n_mcmc_samples : 90
+    stride_for_evaluating_holdout_performance: 1
+    categorical_model_type: 7 # SOFTMAX 
+    seed : 0 
+
+  pga_softmax_gibbs:
+    n_samples: 100
+    pct_burn_in: 0.0
+    stride_for_evaluating_holdout_performance: 1
+
+plot:
+  min_pct_iterates_with_non_nan_metrics_in_order_to_plot_curve : 0.5 
+  min_log_likelihood_for_y_axis : -10.0

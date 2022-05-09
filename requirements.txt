@@ -1,0 +1,23 @@
+bidict
+jax
+jaxlib
+latextable
+matplotlib==3.5.1 # for ax.set_xticks() where we can specify tick locations and labels.
+numpy==1.19.4 
+# the examples in example.py depend on the random seed; is pinning the version of numpy sufficient to
+# guarantee invariance of the examples?
+numpyro 
+openpyxl # to open csvs with pandas 
+pandas 
+pypolyagamma 
+pymc3==3.11.2 # a first stab at advi; this has been discarded in favor of my own wrapper around pytorch
+pydantic
+pyyaml
+recordclass
+seaborn
+scipy
+sklearn
+statsmodels # used by seaborn to make certain plots (e.g. for lowess regression)
+tabulate 
+tqdm
+

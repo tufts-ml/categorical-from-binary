@@ -1,0 +1,46 @@
+meta:
+  purpose : "demo_cyber_locally" 
+  save_dir : "./data/results/arxiv_prep/demo_cyber_locally/"
+  
+data :
+  cyber:
+    path_to_human_process_start_data : "./data/real_data/cyber/human_process_starts_first_2095.csv"  # 73 KB
+    subset_initial_user_idx_when_sorting_most_to_fewest_events : 2 # users 0 and 1 only launched a single process
+    subset_number_of_users : 1 
+    user_idx_relative_to_subset : 0
+    window_size : 5 
+    temperature : 60  # one minute
+    include_intercept : True 
+    pct_training : 0.8  
+
+holdout_performance:
+  advi:
+    n_iterations : 10
+    seed : 0 
+    lrs :
+      - 0.01 
+      - 0.1 
+      - 1 
+    link2 : 2 # SOFTMAX 
+
+  cavi_probit:
+    n_iterations: 5 
+
+  cavi_logit:
+      n_iterations: 1
+
+  nuts : 
+    n_warmup : 10
+    n_mcmc_samples : 10
+    stride_for_evaluating_holdout_performance: 1
+    categorical_model_type: 7 # SOFTMAX 
+    seed : 0 
+  
+  pga_softmax_gibbs:
+    n_samples: 50
+    pct_burn_in: 0.0
+    stride_for_evaluating_holdout_performance: 1
+
+plot:
+  min_pct_iterates_with_non_nan_metrics_in_order_to_plot_curve : 0.5 
+  min_log_likelihood_for_y_axis : "random guessing"

@@ -1,0 +1,272 @@
+
+"""
+Now compare how results look when Bambi uses the same prior as IB-CAVI 
+
+
+"""
+"""
+A larger dataset. 
+
+n_categories = 100
+n_features = 200
+n_samples = 8000
+scale_for_predictive_categories=2.0
+
+it took IB-CAVI 19.8 seconds to beat the holdout log like that ADVI took 533 seconds (8.8 mins)
+(a 26x speedup).
+
+"""
+
+"""
+Nice results for 
+n_categories = 10
+n_features = 20
+n_samples = 200
+scale_for_predictive_categories=2.0
+and 
+n_draws = default 
+n_tune = default 
+n_init = default 
+
+# IB-CAVI gets better results even though ADVI takes 84x as long.
+
+    dgp_mean_log_like  dgp_accuracy  dgp_mean_choice_rank  \
+0          -0.963165                             0.65                 1.875   
+
+   multi_logit_ADVI_mean_log_like  \
+0                        -2.08055   
+
+   multi_logit_ADVI_accuracy  \
+0                                         0.575   
+
+   multi_logit_ADVI_mean_choice_rank  IB_CAVI_plus_BMA_mean_log_like  \
+0                               2.75                       -1.574196   
+
+   IB_CAVI_plus_BMA_accuracy  \
+0                                         0.625   
+
+   IB_CAVI_plus_BMA_mean_choice_rank  time_for_ADVI  time_for_CAVI  
+0                              2.525      42.112774       0.598448 
+
+"""
+
+"""
+More nice results
+for 
+n_categories = 40
+n_features = 80
+n_samples = 3200
+scale_for_predictive_categories=2.0
+# it takes IB_CAVI .53 seconds to beat this likelihood; it's 320x faster! 
+
+    dgp_mean_log_like  dgp_accuracy  dgp_mean_choice_rank  \
+0          -1.126633                          0.66875              2.184375   
+
+   multi_logit_ADVI_mean_log_like  \
+0                       -2.108103   
+
+   multi_logit_ADVI_accuracy  \
+0                                        0.4875   
+
+   multi_logit_ADVI_mean_choice_rank  IB_CAVI_plus_BMA_mean_log_like  \
+0                             3.8375                       -1.476596   
+
+   IB_CAVI_plus_BMA_accuracy  \
+0                                      0.576562   
+
+   IB_CAVI_plus_BMA_mean_choice_rank  time_for_ADVI  time_for_CAVI  
+0                           3.007812     162.889271      160.47151  
+
+"""
+
+"""
+Results for 
+n_categories = 20
+n_features = 40
+n_samples = 800
+scale_for_predictive_categories=2.0
+and 
+and 
+n_draws = default 
+n_tune = default 
+n_init = default 
+
+
+
+    dgp_mean_log_like  dgp_accuracy  dgp_mean_choice_rank  \
+0          -1.241327                              0.6                   2.3   
+
+   multi_logit_ADVI_mean_log_like  \
+0                       -2.639955   
+
+   multi_logit_ADVI_accuracy  \
+0                                       0.44375   
+
+   multi_logit_ADVI_mean_choice_rank  IB_CAVI_plus_BMA_mean_log_like  \
+0                              3.725                       -1.860801   
+
+   IB_CAVI_plus_BMA_accuracy  \
+0                                        0.4875   
+
+   IB_CAVI_plus_BMA_mean_choice_rank  time_for_ADVI  time_for_CAVI  
+0                            3.14375      71.113859       9.653459 
+
+"""
+
+""""
+For 
+n_categories = 100
+n_features = 200
+n_samples = 8000
+we can't even run ADVI from pymc3 without erroring out due to a Timeout error
+
+
+---------------------------------------------------------------------------
+Timeout                                   Traceback (most recent call last)
+File ~/Repos/categorical_from_binary/src/categorical_from_binary/timing.py:28, in time_me.<locals>._time_it(*args, **kwargs)
+     27 try:
+---> 28     result = func(*args, **kwargs)
+     29 finally:
+
+Input In [4], in get_fitted_advi_model(model, n_draws, n_tune, n_init)
+      7 """
+      8 Arguments:
+      9     n_tune, n_draws, n_init: Same defaults as set by bambi/pymc3
+     10 """
+---> 11 return model.fit(method="advi", draws=n_draws, tune=n_tune, n_init=n_init).fit()
+
+File ~/Repos/categorical_from_binary/env/lib/python3.8/site-packages/bambi/models.py:268, in Model.fit(self, draws, tune, discard_tuned_samples, omit_offsets, include_mean, method, init, n_init, chains, cores, random_seed, **kwargs)
+    267 if not self.built:
+--> 268     self.build()
+    270 # Tell user which event is being modeled
+
+File ~/Repos/categorical_from_binary/env/lib/python3.8/site-packages/bambi/models.py:300, in Model.build(self)
+    299 self.backend = PyMC3Model()
+--> 300 self.backend.build(self)
+    301 self.built = True
+
+File ~/Repos/categorical_from_binary/env/lib/python3.8/site-packages/bambi/backend/pymc.py:65, in PyMC3Model.build(self, spec)
+     64 with self.model:
+---> 65     self._build_intercept(spec)
+     66     self._build_common_terms(spec)
+
+File ~/Repos/categorical_from_binary/env/lib/python3.8/site-packages/bambi/backend/pymc.py:113, in PyMC3Model._build_intercept(self, spec)
+    112 if self.has_intercept:
+--> 113     self.mu += InterceptTerm(spec.intercept_term).build(spec)
+
+File ~/Repos/categorical_from_binary/env/lib/python3.8/site-packages/bambi/backend/terms.py:188, in InterceptTerm.build(self, spec)
+    187     dims = list(spec.response.pymc_coords)
+--> 188     dist = dist(label, dims=dims, **self.term.prior.args)[np.newaxis, :]
+    189 else:
+
+File ~/Repos/categorical_from_binary/env/lib/python3.8/site-packages/pymc3/distributions/distribution.py:119, in Distribution.__new__(cls, name, *args, **kwargs)
+    118 if has_shape or shape is not None:
+--> 119     dist = cls.dist(*args, **kwargs, shape=shape)
+    120 else:
+
+File ~/Repos/categorical_from_binary/env/lib/python3.8/site-packages/pymc3/distributions/distribution.py:130, in Distribution.dist(cls, *args, **kwargs)
+    129 dist = object.__new__(cls)
+--> 130 dist.__init__(*args, **kwargs)
+    131 return dist
+
+File ~/Repos/categorical_from_binary/env/lib/python3.8/site-packages/pymc3/distributions/continuous.py:488, in Normal.__init__(self, mu, sigma, tau, sd, **kwargs)
+    487 self.mean = self.median = self.mode = self.mu = mu = tt.as_tensor_variable(floatX(mu))
+--> 488 self.variance = 1.0 / self.tau
+    490 assert_negative_support(sigma, "sigma", "Normal")
+
+File ~/Repos/categorical_from_binary/env/lib/python3.8/site-packages/theano/tensor/var.py:176, in _tensor_py_operators.__rtruediv__(self, other)
+    175 def __rtruediv__(self, other):
+--> 176     return theano.tensor.basic.true_div(other, self)
+
+File ~/Repos/categorical_from_binary/env/lib/python3.8/site-packages/theano/graph/op.py:253, in Op.__call__(self, *inputs, **kwargs)
+    252 if config.compute_test_value != "off":
+--> 253     compute_test_value(node)
+    255 if self.default_output is not None:
+
+File ~/Repos/categorical_from_binary/env/lib/python3.8/site-packages/theano/graph/op.py:126, in compute_test_value(node)
+    125 # Create a thunk that performs the computation
+--> 126 thunk = node.op.make_thunk(node, storage_map, compute_map, no_recycling=[])
+    127 thunk.inputs = [storage_map[v] for v in node.inputs]
+
+File ~/Repos/categorical_from_binary/env/lib/python3.8/site-packages/theano/graph/op.py:634, in COp.make_thunk(self, node, storage_map, compute_map, no_recycling, impl)
+    633 try:
+--> 634     return self.make_c_thunk(node, storage_map, compute_map, no_recycling)
+    635 except (NotImplementedError, MethodNotDefined):
+    636     # We requested the c code, so don't catch the error.
+
+File ~/Repos/categorical_from_binary/env/lib/python3.8/site-packages/theano/graph/op.py:600, in COp.make_c_thunk(self, node, storage_map, compute_map, no_recycling)
+    599         raise NotImplementedError("float16")
+--> 600 outputs = cl.make_thunk(
+    601     input_storage=node_input_storage, output_storage=node_output_storage
+    602 )
+    603 thunk, node_input_filters, node_output_filters = outputs
+
+File ~/Repos/categorical_from_binary/env/lib/python3.8/site-packages/theano/link/c/basic.py:1203, in CLinker.make_thunk(self, input_storage, output_storage, storage_map)
+   1202 init_tasks, tasks = self.get_init_tasks()
+-> 1203 cthunk, module, in_storage, out_storage, error_storage = self.__compile__(
+   1204     input_storage, output_storage, storage_map
+   1205 )
+   1207 res = _CThunk(cthunk, init_tasks, tasks, error_storage, module)
+
+File ~/Repos/categorical_from_binary/env/lib/python3.8/site-packages/theano/link/c/basic.py:1138, in CLinker.__compile__(self, input_storage, output_storage, storage_map)
+   1137 output_storage = tuple(output_storage)
+-> 1138 thunk, module = self.cthunk_factory(
+   1139     error_storage,
+   1140     input_storage,
+   1141     output_storage,
+   1142     storage_map,
+   1143 )
+   1144 return (
+   1145     thunk,
+   1146     module,
+   (...)
+   1155     error_storage,
+   1156 )
+
+File ~/Repos/categorical_from_binary/env/lib/python3.8/site-packages/theano/link/c/basic.py:1634, in CLinker.cthunk_factory(self, error_storage, in_storage, out_storage, storage_map)
+   1633         node.op.prepare_node(node, storage_map, None, "c")
+-> 1634     module = get_module_cache().module_from_key(key=key, lnk=self)
+   1636 vars = self.inputs + self.outputs + self.orphans
+
+File ~/Repos/categorical_from_binary/env/lib/python3.8/site-packages/theano/link/c/cmodule.py:1157, in ModuleCache.module_from_key(self, key, lnk)
+   1156 module_hash = get_module_hash(src_code, key)
+-> 1157 module = self._get_from_hash(module_hash, key)
+   1158 if module is not None:
+
+File ~/Repos/categorical_from_binary/env/lib/python3.8/site-packages/theano/link/c/cmodule.py:1058, in ModuleCache._get_from_hash(self, module_hash, key)
+   1057 module = self._get_from_key(None, key_data)
+-> 1058 with lock_ctx():
+   1059     try:
+
+File ~/.pyenv/versions/3.8.5/lib/python3.8/contextlib.py:113, in _GeneratorContextManager.__enter__(self)
+    112 try:
+--> 113     return next(self.gen)
+    114 except StopIteration:
+
+File ~/Repos/categorical_from_binary/env/lib/python3.8/site-packages/theano/compile/compilelock.py:73, in lock_ctx(lock_dir, timeout)
+     72 fl = filelock.FileLock(os.path.join(lock_dir, ".lock"))
+---> 73 fl.acquire(timeout=timeout)
+     74 try:
+
+File ~/Repos/categorical_from_binary/env/lib/python3.8/site-packages/filelock/_api.py:176, in BaseFileLock.acquire(self, timeout, poll_interval, poll_intervall)
+    175     _LOGGER.debug("Timeout on acquiring lock %s on %s", lock_id, lock_filename)
+--> 176     raise Timeout(self._lock_file)
+    177 else:
+
+Timeout: The file lock '/Users/mwojno01/.theano/compiledir_macOS-10.16-x86_64-i386-64bit-i386-3.8.5-64/.lock' could not be acquired.
+
+During handling of the above exception, another exception occurred:
+
+UnboundLocalError                         Traceback (most recent call last)
+Input In [4], in <module>
+     17 n_tune = 10
+     18 n_init = 10
+---> 19 model_fitted_by_ADVI, time_for_ADVI = time_me(get_fitted_advi_model)(model)
+
+File ~/Repos/categorical_from_binary/src/categorical_from_binary/timing.py:32, in time_me.<locals>._time_it(*args, **kwargs)
+     30 end = time.time()
+     31 elapsed = end - start
+---> 32 return result, elapsed
+
+UnboundLocalError: local variable 'result' referenced before assignment
+"""

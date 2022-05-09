@@ -1,0 +1,200 @@
+"""
+Here we compare two estimators (CBC probit and CBM Probit) for the category probabilities 
+given beta-hat when 
+(a) we use the variational posterior expectation for beta-hat
+(b) covariates are present
+(c) the data generation process uses various links.
+"""
+
+# Data Generating Process is the CBC Link 
+
+"""
+Results with:
+    seed 1 
+    convergence_criterion_drop_in_elbo = 0.1 
+
+Now running evaluations on train data
+The Metric.MEAN_LOG_LIKELIHOOD from plugging the variational posterior mean into the category probabilities of Link.CBC_PROBIT is -0.295
+The Metric.MEAN_LOG_LIKELIHOOD from plugging the variational posterior mean into the category probabilities of Link.CBM_PROBIT is -0.346
+The Metric.MEAN_LIKELIHOOD from plugging the variational posterior mean into the category probabilities of Link.CBC_PROBIT is 0.839
+The Metric.MEAN_LIKELIHOOD from plugging the variational posterior mean into the category probabilities of Link.CBM_PROBIT is 0.765
+
+
+
+Now running evaluations on test data
+The Metric.MEAN_LOG_LIKELIHOOD from plugging the variational posterior mean into the category probabilities of Link.CBC_PROBIT is -0.292
+The Metric.MEAN_LOG_LIKELIHOOD from plugging the variational posterior mean into the category probabilities of Link.CBM_PROBIT is -0.338
+The Metric.MEAN_LIKELIHOOD from plugging the variational posterior mean into the category probabilities of Link.CBC_PROBIT is 0.835
+The Metric.MEAN_LIKELIHOOD from plugging the variational posterior mean into the category probabilities of Link.CBM_PROBIT is 0.764
+
+"""
+
+"""
+Results with:
+    seed 12 
+    convergence_criterion_drop_in_elbo = 0.1 
+
+Now running evaluations on train data
+The Metric.MEAN_LOG_LIKELIHOOD from plugging the variational posterior mean into the category probabilities of Link.CBC_PROBIT is -0.378
+The Metric.MEAN_LOG_LIKELIHOOD from plugging the variational posterior mean into the category probabilities of Link.CBM_PROBIT is -0.423
+The Metric.MEAN_LIKELIHOOD from plugging the variational posterior mean into the category probabilities of Link.CBC_PROBIT is 0.804
+The Metric.MEAN_LIKELIHOOD from plugging the variational posterior mean into the category probabilities of Link.CBM_PROBIT is 0.72
+
+
+
+Now running evaluations on test data
+The Metric.MEAN_LOG_LIKELIHOOD from plugging the variational posterior mean into the category probabilities of Link.CBC_PROBIT is -0.4
+The Metric.MEAN_LOG_LIKELIHOOD from plugging the variational posterior mean into the category probabilities of Link.CBM_PROBIT is -0.432
+The Metric.MEAN_LIKELIHOOD from plugging the variational posterior mean into the category probabilities of Link.CBC_PROBIT is 0.799
+The Metric.MEAN_LIKELIHOOD from plugging the variational posterior mean into the category probabilities of Link.CBM_PROBIT is 0.719
+
+"""
+
+"""
+Results with:
+    seed 123
+    convergence_criterion_drop_in_elbo = 0.1 
+
+Now running evaluations on train data
+The Metric.MEAN_LOG_LIKELIHOOD from plugging the variational posterior mean into the category probabilities of Link.CBC_PROBIT is -0.411
+The Metric.MEAN_LOG_LIKELIHOOD from plugging the variational posterior mean into the category probabilities of Link.CBM_PROBIT is -0.484
+The Metric.MEAN_LIKELIHOOD from plugging the variational posterior mean into the category probabilities of Link.CBC_PROBIT is 0.762
+The Metric.MEAN_LIKELIHOOD from plugging the variational posterior mean into the category probabilities of Link.CBM_PROBIT is 0.663
+
+
+
+Now running evaluations on test data
+The Metric.MEAN_LOG_LIKELIHOOD from plugging the variational posterior mean into the category probabilities of Link.CBC_PROBIT is -0.367
+The Metric.MEAN_LOG_LIKELIHOOD from plugging the variational posterior mean into the category probabilities of Link.CBM_PROBIT is -0.458
+The Metric.MEAN_LIKELIHOOD from plugging the variational posterior mean into the category probabilities of Link.CBC_PROBIT is 0.78
+The Metric.MEAN_LIKELIHOOD from plugging the variational posterior mean into the category probabilities of Link.CBM_PROBIT is 0.674
+
+"""
+
+
+"""
+
+Results with:
+    seed 1234
+    convergence_criterion_drop_in_elbo = 0.1 
+
+The Metric.MEAN_LOG_LIKELIHOOD from plugging the variational posterior mean into the category probabilities of Link.CBC_PROBIT is -0.323
+The Metric.MEAN_LOG_LIKELIHOOD from plugging the variational posterior mean into the category probabilities of Link.CBM_PROBIT is -0.295
+The Metric.MEAN_LIKELIHOOD from plugging the variational posterior mean into the category probabilities of Link.CBC_PROBIT is 0.861
+The Metric.MEAN_LIKELIHOOD from plugging the variational posterior mean into the category probabilities of Link.CBM_PROBIT is 0.812
+
+
+
+Now running evaluations on test data
+The Metric.MEAN_LOG_LIKELIHOOD from plugging the variational posterior mean into the category probabilities of Link.CBC_PROBIT is -0.33
+The Metric.MEAN_LOG_LIKELIHOOD from plugging the variational posterior mean into the category probabilities of Link.CBM_PROBIT is -0.299
+The Metric.MEAN_LIKELIHOOD from plugging the variational posterior mean into the category probabilities of Link.CBC_PROBIT is 0.858
+The Metric.MEAN_LIKELIHOOD from plugging the variational posterior mean into the category probabilities of Link.CBM_PROBIT is 0.808
+"""
+
+"""
+Results with:
+    seed 12345 
+    convergence_criterion_drop_in_elbo = 0.1 
+
+Now running evaluations on train data
+The Metric.MEAN_LOG_LIKELIHOOD from plugging the variational posterior mean into the category probabilities of Link.CBC_PROBIT is -0.371
+The Metric.MEAN_LOG_LIKELIHOOD from plugging the variational posterior mean into the category probabilities of Link.CBM_PROBIT is -0.414
+The Metric.MEAN_LIKELIHOOD from plugging the variational posterior mean into the category probabilities of Link.CBC_PROBIT is 0.798
+The Metric.MEAN_LIKELIHOOD from plugging the variational posterior mean into the category probabilities of Link.CBM_PROBIT is 0.722
+
+
+
+Now running evaluations on test data
+The Metric.MEAN_LOG_LIKELIHOOD from plugging the variational posterior mean into the category probabilities of Link.CBC_PROBIT is -0.374
+The Metric.MEAN_LOG_LIKELIHOOD from plugging the variational posterior mean into the category probabilities of Link.CBM_PROBIT is -0.424
+The Metric.MEAN_LIKELIHOOD from plugging the variational posterior mean into the category probabilities of Link.CBC_PROBIT is 0.794
+The Metric.MEAN_LIKELIHOOD from plugging the variational posterior mean into the category probabilities of Link.CBM_PROBIT is 0.717
+"""
+
+
+# Data Generating Process is the Multi-Logit Link 
+
+
+"""
+seed = 2
+convergence_criterion_drop_in_elbo  = 5.0
+
+Now running evaluations on train data
+The Metric.MEAN_LOG_LIKELIHOOD from plugging the variational posterior mean into the category probabilities of Link.CBC_PROBIT is -0.612
+The Metric.MEAN_LOG_LIKELIHOOD from plugging the variational posterior mean into the category probabilities of Link.CBM_PROBIT is -0.615
+The Metric.MEAN_LIKELIHOOD from plugging the variational posterior mean into the category probabilities of Link.CBC_PROBIT is 0.693
+The Metric.MEAN_LIKELIHOOD from plugging the variational posterior mean into the category probabilities of Link.CBM_PROBIT is 0.616
+
+
+
+Now running evaluations on test data
+The Metric.MEAN_LOG_LIKELIHOOD from plugging the variational posterior mean into the category probabilities of Link.CBC_PROBIT is -0.674
+The Metric.MEAN_LOG_LIKELIHOOD from plugging the variational posterior mean into the category probabilities of Link.CBM_PROBIT is -0.637
+The Metric.MEAN_LIKELIHOOD from plugging the variational posterior mean into the category probabilities of Link.CBC_PROBIT is 0.678
+The Metric.MEAN_LIKELIHOOD from plugging the variational posterior mean into the category probabilities of Link.CBM_PROBIT is 0.604
+"""
+
+"""
+seed = 3
+convergence_criterion_drop_in_elbo  = 5.0
+
+Now running evaluations on train data
+The Metric.MEAN_LOG_LIKELIHOOD from plugging the variational posterior mean into the category probabilities of Link.CBC_PROBIT is -0.77
+The Metric.MEAN_LOG_LIKELIHOOD from plugging the variational posterior mean into the category probabilities of Link.CBM_PROBIT is -0.697
+The Metric.MEAN_LIKELIHOOD from plugging the variational posterior mean into the category probabilities of Link.CBC_PROBIT is 0.663
+The Metric.MEAN_LIKELIHOOD from plugging the variational posterior mean into the category probabilities of Link.CBM_PROBIT is 0.588
+
+
+
+Now running evaluations on test data
+The Metric.MEAN_LOG_LIKELIHOOD from plugging the variational posterior mean into the category probabilities of Link.CBC_PROBIT is -0.781
+The Metric.MEAN_LOG_LIKELIHOOD from plugging the variational posterior mean into the category probabilities of Link.CBM_PROBIT is -0.693
+The Metric.MEAN_LIKELIHOOD from plugging the variational posterior mean into the category probabilities of Link.CBC_PROBIT is 0.666
+The Metric.MEAN_LIKELIHOOD from plugging the variational posterior mean into the category probabilities of Link.CBM_PROBIT is 0.59
+
+"""
+
+
+# Data Generating Process Uses the CBM Link 
+
+
+
+"""
+seed = 2
+convergence_criterion_drop_in_elbo = 5.0
+
+The Metric.MEAN_LOG_LIKELIHOOD from plugging the variational posterior mean into the category probabilities of Link.CBC_PROBIT is -0.588
+The Metric.MEAN_LOG_LIKELIHOOD from plugging the variational posterior mean into the category probabilities of Link.CBM_PROBIT is -0.564
+The Metric.MEAN_LIKELIHOOD from plugging the variational posterior mean into the category probabilities of Link.CBC_PROBIT is 0.693
+The Metric.MEAN_LIKELIHOOD from plugging the variational posterior mean into the category probabilities of Link.CBM_PROBIT is 0.63
+
+
+
+Now running evaluations on test data
+The Metric.MEAN_LOG_LIKELIHOOD from plugging the variational posterior mean into the category probabilities of Link.CBC_PROBIT is -0.58
+The Metric.MEAN_LOG_LIKELIHOOD from plugging the variational posterior mean into the category probabilities of Link.CBM_PROBIT is -0.566
+The Metric.MEAN_LIKELIHOOD from plugging the variational posterior mean into the category probabilities of Link.CBC_PROBIT is 0.691
+The Metric.MEAN_LIKELIHOOD from plugging the variational posterior mean into the category probabilities of Link.CBM_PROBIT is 0.629
+
+"""
+"""
+seed = 1 
+convergence_criterion_drop_in_elbo = 5.0
+
+Now running evaluations on train data
+The Metric.MEAN_LOG_LIKELIHOOD from plugging the variational posterior mean into the category probabilities of Link.CBC_PROBIT is -0.773
+The Metric.MEAN_LOG_LIKELIHOOD from plugging the variational posterior mean into the category probabilities of Link.CBM_PROBIT is -0.75
+The Metric.MEAN_LIKELIHOOD from plugging the variational posterior mean into the category probabilities of Link.CBC_PROBIT is 0.553
+The Metric.MEAN_LIKELIHOOD from plugging the variational posterior mean into the category probabilities of Link.CBM_PROBIT is 0.509
+
+
+
+Now running evaluations on test data
+The Metric.MEAN_LOG_LIKELIHOOD from plugging the variational posterior mean into the category probabilities of Link.CBC_PROBIT is -0.812
+The Metric.MEAN_LOG_LIKELIHOOD from plugging the variational posterior mean into the category probabilities of Link.CBM_PROBIT is -0.776
+The Metric.MEAN_LIKELIHOOD from plugging the variational posterior mean into the category probabilities of Link.CBC_PROBIT is 0.532
+The Metric.MEAN_LIKELIHOOD from plugging the variational posterior mean into the category probabilities of Link.CBM_PROBIT is 0.496
+
+"""
+

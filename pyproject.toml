@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+
+[tool.black]
+line-length = 88
+py36 = false
+exclude = '''
+(
+  /(
+      \.git
+    | \.hg
+    | \.mypy_cache
+    | \.tox
+    | \.venv
+    | py2-env
+    | env
+    | buck-out
+    | build
+    | dist
+    | \.vscode
+    | examples
+  )/
+  | _pb2\.py        # skip auto-generated protobuf code
+)
+'''
