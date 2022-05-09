@@ -27,7 +27,7 @@ from categorical_from_binary.ib_cavi.cbm_vs_cbc.bma import (
 )
 from categorical_from_binary.ib_cavi.multi.inference import (
     IB_Model,
-    compute_multiclass_vi_with_normal_prior,
+    compute_ib_cavi_with_normal_prior,
 )
 from categorical_from_binary.io import ensure_dir
 from categorical_from_binary.metrics import (
@@ -129,9 +129,7 @@ def run_CAVI_vs_MLE_simulations(
         ###
 
         # IB-CAVI
-        results_CAVI, time_for_IB_CAVI = time_me(
-            compute_multiclass_vi_with_normal_prior
-        )(
+        results_CAVI, time_for_IB_CAVI = time_me(compute_ib_cavi_with_normal_prior)(
             ib_model,
             labels_train,
             covariates_train,

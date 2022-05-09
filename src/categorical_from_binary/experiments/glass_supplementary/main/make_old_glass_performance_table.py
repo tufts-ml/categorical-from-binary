@@ -26,7 +26,7 @@ from categorical_from_binary.experiments.glass_supplementary.hmc_helpers import 
 )
 from categorical_from_binary.ib_cavi.multi.inference import (
     IB_Model,
-    compute_multiclass_vi_with_normal_prior,
+    compute_ib_cavi_with_normal_prior,
 )
 from categorical_from_binary.timing import time_me
 
@@ -72,7 +72,7 @@ for random_seed in range(num_data_splits):
     ####
     # Variational Inference with multiclass probit regression
     ####
-    results_probit = compute_multiclass_vi_with_normal_prior(
+    results_probit = compute_ib_cavi_with_normal_prior(
         IB_Model.PROBIT,
         split_dataset.labels_train,
         split_dataset.covariates_train,
@@ -86,7 +86,7 @@ for random_seed in range(num_data_splits):
     ####
     # Variational Inference with multiclass logit regression
     ####
-    results_logit = compute_multiclass_vi_with_normal_prior(
+    results_logit = compute_ib_cavi_with_normal_prior(
         IB_Model.LOGIT,
         split_dataset.labels_train,
         split_dataset.covariates_train,

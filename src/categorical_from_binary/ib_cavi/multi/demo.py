@@ -1,8 +1,7 @@
-
 """
 Here we demo the predictive performance over time.
 """
-import pandas as pd 
+import pandas as pd
 
 from categorical_from_binary.data_generation.bayes_multiclass_reg import (
     ControlCategoryPredictability,
@@ -11,8 +10,9 @@ from categorical_from_binary.data_generation.bayes_multiclass_reg import (
 )
 from categorical_from_binary.ib_cavi.multi.inference import (
     IB_Model,
-    compute_multiclass_vi_with_normal_prior,
+    compute_ib_cavi_with_normal_prior,
 )
+
 
 ###
 # Construct dataset
@@ -48,7 +48,7 @@ labels_test = dataset.labels[n_train_samples:]
 # Variational Inference
 ####
 ib_model = IB_Model.PROBIT
-results = compute_multiclass_vi_with_normal_prior(
+results = compute_ib_cavi_with_normal_prior(
     ib_model,
     labels_train,
     covariates_train,
@@ -57,6 +57,5 @@ results = compute_multiclass_vi_with_normal_prior(
     variational_params_init=None,
     convergence_criterion_drop_in_mean_elbo=0.01,
 )
-pd.set_option('display.max_columns', None)
+pd.set_option("display.max_columns", None)
 print(f"\n\nPerformance over time: \n {results.performance_over_time}")
-

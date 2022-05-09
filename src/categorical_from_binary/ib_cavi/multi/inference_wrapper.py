@@ -45,7 +45,7 @@ def compute_precomputables_dummy(
     return Precomputables(None, None, None)
 
 
-def compute_multiclass_vi(
+def compute_ib_cavi(
     labels: Union[NumpyArray2D, spmatrix],
     covariates: Union[NumpyArray2D, spmatrix],
     links_for_category_probabilities: List[Link],

@@ -26,7 +26,7 @@ from categorical_from_binary.ib_cavi.cbm_vs_cbc.bma import (
 )
 from categorical_from_binary.ib_cavi.multi.inference import (
     IB_Model,
-    compute_multiclass_vi_with_normal_prior,
+    compute_ib_cavi_with_normal_prior,
     do_link_from_ib_model,
     sdo_link_from_ib_model,
 )
@@ -95,7 +95,7 @@ for (s, dgc) in enumerate(data_generation_configs):
         sdo_link = sdo_link_from_ib_model(ib_model)
         do_link = do_link_from_ib_model(ib_model)
 
-        results = compute_multiclass_vi_with_normal_prior(
+        results = compute_ib_cavi_with_normal_prior(
             ib_model,
             labels_train,
             covariates_train,

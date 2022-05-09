@@ -9,7 +9,7 @@ from categorical_from_binary.hmc.core import (
 )
 from categorical_from_binary.ib_cavi.multi.inference import (
     IB_Model,
-    compute_multiclass_vi_with_normal_prior,
+    compute_ib_cavi_with_normal_prior,
 )
 from categorical_from_binary.kucukelbir.inference import (
     ADVI_Results,
@@ -97,7 +97,7 @@ def compute_performance_over_time(
         or only_run_this_inference == InferenceType.CAVI_PROBIT
     ):
 
-        results_CAVI_probit = compute_multiclass_vi_with_normal_prior(
+        results_CAVI_probit = compute_ib_cavi_with_normal_prior(
             IB_Model.PROBIT,
             labels_train,
             covariates_train,
@@ -118,7 +118,7 @@ def compute_performance_over_time(
         or only_run_this_inference == InferenceType.CAVI_LOGIT
     ):
 
-        results_CAVI_logit = compute_multiclass_vi_with_normal_prior(
+        results_CAVI_logit = compute_ib_cavi_with_normal_prior(
             IB_Model.LOGIT,
             labels_train,
             covariates_train,

@@ -21,7 +21,7 @@ from categorical_from_binary.ib_cavi.cbm_vs_cbc.bma import (
 )
 from categorical_from_binary.ib_cavi.multi.inference import (
     IB_Model,
-    compute_multiclass_vi_with_normal_prior,
+    compute_ib_cavi_with_normal_prior,
 )
 from categorical_from_binary.metrics import (
     append_metrics_dict_for_one_dataset_to_results_dict,
@@ -138,7 +138,7 @@ metrics_dict["dgp"] = compute_metrics(
 ib_model = IB_Model.LOGIT
 # convergence_criterion_drop_in_mean_elbo = 10.0
 max_n_iterations = 1000
-results_CAVI, time_for_CAVI = time_me(compute_multiclass_vi_with_normal_prior)(
+results_CAVI, time_for_CAVI = time_me(compute_ib_cavi_with_normal_prior)(
     ib_model,
     labels_train,
     covariates_train,

@@ -41,21 +41,21 @@ Then we do approximate Bayesian inference.
 
 1. We apply our proposed approximate Bayesian inference method: 
 
-   * IB-CAVI (Independent Binary - Coordinate Ascent Variational Inference).
+ * IB-CAVI (Independent Binary - Coordinate Ascent Variational Inference).
 
-   This method uses categorical-from-binary likelihoods, as they have natural independent binary approximations.  
+   This method uses categorical-from-binary likelihoods, which have natural independent binary approximations.  
 
 2. For baseline methods, we fit the softmax likelihood to this data using:
  
-  * NUTS (No U-Turn Sampler)
+ * NUTS (No U-Turn Sampler)
  * Gibbs sampling (via Polya-Gamma augmentation)
  * Automatic differentiation variational inference.
 
 The code will automatically write holdout-performance-over-time plots to `data/results/demo_sims/`.  The plots will look like this:
 
 <p float="left">
-  <img src="images/test_mean_log_likelihood_show_CB_logit=True_legend=True.png" width="200" />
-  <img src="images/test_accuracy_show_CB_logit=True_legend=True.png" width="200" /> 
+  <img src="images/test_mean_log_likelihood_show_CB_logit=True_legend=True.png" width="400" />
+  <img src="images/test_accuracy_show_CB_logit=True_legend=True.png" width="400" /> 
 </p>
 
 More extensive [experiments](/src/categorical_from_binary/experiments) can take substantially longer to run than this quick demo.  Results from those experiments are summarized in the paper.
@@ -67,10 +67,10 @@ Would you like to apply IB-CAVI to your own data?  Usage is demonstrated in [thi
 ```python
 from categorical_from_binary.ib_cavi.multi.inference import (
     IB_Model,
-    compute_multiclass_vi_with_normal_prior,
+    compute_ib_cavi_with_normal_prior,
 )
 
-results = compute_multiclass_vi_with_normal_prior(
+results = compute_ib_cavi_with_normal_prior(
     IB_Model.PROBIT,
     labels_train,
     covariates_train,

@@ -15,7 +15,7 @@ from scipy.sparse import spmatrix
 
 from categorical_from_binary.data_generation.bayes_multiclass_reg import Link
 from categorical_from_binary.ib_cavi.multi.inference_wrapper import (
-    compute_multiclass_vi,
+    compute_ib_cavi,
     compute_precomputables_dummy,
 )
 from categorical_from_binary.ib_cavi.multi.structs import (
@@ -423,7 +423,7 @@ def compute_multiclass_logit_vi_with_CBC_aux_var_and_polya_gamma_augmentation(
         raise NotImplementedError("Try passing dense covariates.")
 
     links_for_category_probabilities = [Link.CBC_LOGIT, Link.CBM_LOGIT]
-    return compute_multiclass_vi(
+    return compute_ib_cavi(
         labels,
         covariates,
         links_for_category_probabilities,

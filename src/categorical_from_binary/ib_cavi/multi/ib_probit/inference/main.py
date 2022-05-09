@@ -23,7 +23,7 @@ from categorical_from_binary.ib_cavi.multi.ib_probit.inference.shrinkage_groups 
 from categorical_from_binary.ib_cavi.multi.ib_probit.inference.tau_helpers import (
     compute_expected_tau_reciprocal_array,
 )
-from categorical_from_binary.ib_cavi.multi.inference_wrapper import compute_multiclass_vi
+from categorical_from_binary.ib_cavi.multi.inference_wrapper import compute_ib_cavi
 from categorical_from_binary.ib_cavi.multi.structs import (
     CAVI_Results,
     ELBO_Stats,
@@ -467,7 +467,7 @@ def compute_multiclass_probit_vi_with_normal_gamma_prior(
     """
     links_for_category_probabilities = [Link.CBM_PROBIT, Link.CBC_PROBIT]
     prior_type = PriorType.NORMAL_GAMMA
-    return compute_multiclass_vi(
+    return compute_ib_cavi(
         labels,
         covariates,
         links_for_category_probabilities,
@@ -525,7 +525,7 @@ def compute_multiclass_probit_vi_with_normal_prior(
     """
     links_for_category_probabilities = [Link.CBM_PROBIT, Link.CBC_PROBIT]
     prior_type = PriorType.NORMAL
-    return compute_multiclass_vi(
+    return compute_ib_cavi(
         labels,
         covariates,
         links_for_category_probabilities,

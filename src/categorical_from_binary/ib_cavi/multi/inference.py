@@ -16,7 +16,10 @@ from categorical_from_binary.ib_cavi.multi.ib_logit.inference import (
 from categorical_from_binary.ib_cavi.multi.ib_probit.inference.main import (
     compute_multiclass_probit_vi_with_normal_prior,
 )
-from categorical_from_binary.ib_cavi.multi.structs import CAVI_Results, VariationalParams
+from categorical_from_binary.ib_cavi.multi.structs import (
+    CAVI_Results,
+    VariationalParams,
+)
 from categorical_from_binary.types import NumpyArray2D
 
 
@@ -25,7 +28,7 @@ class IB_Model(Enum):
     PROBIT = 2
 
 
-def compute_multiclass_vi_with_normal_prior(
+def compute_ib_cavi_with_normal_prior(
     ib_model: IB_Model,
     labels: Union[NumpyArray2D, spmatrix],
     covariates: Union[NumpyArray2D, spmatrix],
