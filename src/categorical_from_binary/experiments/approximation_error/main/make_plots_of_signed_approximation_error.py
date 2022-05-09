@@ -77,7 +77,7 @@ dict_of_error_before_and_after_averaging = defaultdict(list)
 results_by_dataset = []
 
 # set configs relative to saving data
-SAVE_DIR = "/Users/mwojno01/Repos/categorical_from_binary/data/results/evaluating_IB_approximation_targets/"
+SAVE_DIR = "data/results/evaluating_IB_approximation_targets/"
 ensure_dir(SAVE_DIR)
 
 for dgc in data_generation_configs:

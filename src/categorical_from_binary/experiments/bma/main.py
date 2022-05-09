@@ -58,7 +58,7 @@ convergence_criterion_drop_in_mean_elbo = 0.1
 ### Plotting configs
 sns_style = "darkgrid"
 sns.set(style=sns_style)
-save_filepath = f"/Users/mwojno01/Desktop/new_bma_plots_{ib_model.name}_{sns_style}"
+save_filepath = f"data/results/bma/new_bma_plots_{ib_model.name}_{sns_style}"
 
 ###
 # Code

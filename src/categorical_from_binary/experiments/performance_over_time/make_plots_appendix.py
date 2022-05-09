@@ -7,7 +7,7 @@ from categorical_from_binary.performance_over_time.plot_dataframes_from_disk imp
 # MEDIUM
 ###
 
-RESULTS_DIR = "/Users/mwojno01/Repos/categorical_from_binary/data/results/arxiv_prep/cluster/medium_sims/"
+RESULTS_DIR = "data/results/arxiv_prep/cluster/medium_sims/"
 
 dir_tail_to_cavi_probit = (
     "05_04_2022_23_31_16_MDT_ONLY_CAVI_PROBIT/result_data_frames/perf_cavi_probit.csv"
@@ -47,9 +47,7 @@ make_performance_over_time_plots_from_dataframes_on_disk(
 ###
 
 
-RESULTS_DIR = (
-    "/Users/mwojno01/Repos/categorical_from_binary/data/results/arxiv_prep/cluster/frogs/"
-)
+RESULTS_DIR = "data/results/arxiv_prep/cluster/frogs/"
 
 
 dir_tail_to_cavi_probit = (
@@ -91,9 +89,7 @@ make_performance_over_time_plots_from_dataframes_on_disk(
 ###
 
 
-RESULTS_DIR = (
-    "/Users/mwojno01/Repos/categorical_from_binary/data/results/arxiv_prep/cluster/glass/"
-)
+RESULTS_DIR = "data/results/arxiv_prep/cluster/glass/"
 
 
 dir_tail_to_cavi_probit = (

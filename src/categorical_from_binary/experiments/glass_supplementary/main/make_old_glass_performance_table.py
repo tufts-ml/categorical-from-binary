@@ -48,7 +48,7 @@ convergence_criterion_drop_in_mean_elbo = 0.005
 num_warmup_samples, num_mcmc_samples = 3000, 10000
 
 # Filepath for saving results
-results_filepath = "/Users/mwojno01/Repos/categorical_from_binary/data/results/glass_identification/glass_identification_results.csv"
+results_filepath = "data/results/glass_identification/glass_identification_results.csv"
 
 ###
 # Run the analysis (or, if desired, load last results)

@@ -12,7 +12,9 @@ matplotlib.rc_file_defaults()
 
 
 ### now on local machine!!
-path_to_mean_log_likes_df = "/Users/mwojno01/Repos/categorical_from_binary/data/results/cyber/mean_log_likes_from_fifty_user_round_robin.csv"
+path_to_mean_log_likes_df = (
+    "data/results/cyber/mean_log_likes_from_fifty_user_round_robin.csv"
+)
 mean_log_likes_df = pd.read_csv(path_to_mean_log_likes_df, index_col=0)
 user_domains = mean_log_likes_df.columns
 

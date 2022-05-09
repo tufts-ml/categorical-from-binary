@@ -5,7 +5,7 @@ from categorical_from_binary.performance_over_time.plot_dataframes_from_disk imp
 
 ### LARGER SIMS
 
-RESULTS_DIR = "/Users/mwojno01/Repos/categorical_from_binary/data/results/arxiv_prep/cluster/larger_sims/"
+RESULTS_DIR = "data/results/arxiv_prep/cluster/larger_sims/"
 
 dir_tail_to_cavi_probit = (
     "04_29_2022_15_27_05_MDT_ONLY_CAVI_PROBIT/result_data_frames/perf_cavi_probit.csv"
@@ -41,7 +41,7 @@ make_performance_over_time_plots_from_dataframes_on_disk(
 
 ### SMALL SIMS
 
-RESULTS_DIR = "/Users/mwojno01/Repos/categorical_from_binary/data/results/arxiv_prep/cluster/small_sims/"
+RESULTS_DIR = "data/results/arxiv_prep/cluster/small_sims/"
 
 dir_tail_to_cavi_logit = (
     "05_03_2022_08_04_07_MDT_ONLY_CAVI_LOGIT/result_data_frames/perf_cavi_logit.csv"

@@ -28,7 +28,7 @@ from categorical_from_binary.experiments.compare_to_mle.results_collector import
 # need to scp -r mwojno01@login.cluster.tufts.edu:/cluster/tufts/hugheslab/mwojno01/data/results/sims/
 # from results_dir_cluster to results_dir_local
 results_dir_cluster = "/cluster/tufts/hugheslab/mwojno01/data/results/sims/"
-results_dir_local = "/Users/mwojno01/Repos/categorical_from_binary/data/results/sims_results_in_icml_draft/ib_probit/"
+results_dir_local = "data/results/sims_results_in_icml_draft/ib_probit/"
 df = make_df_from_directory_taking_one_file_for_each_seed(
     results_dir_local, prefix_for_filenames_of_interest="sim_results_CAVI_vs_MLE_"
 )

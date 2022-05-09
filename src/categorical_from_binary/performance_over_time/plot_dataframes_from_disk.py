@@ -7,7 +7,9 @@ from pandas.core.frame import DataFrame
 
 from categorical_from_binary.io import ensure_dir, read_json
 from categorical_from_binary.performance_over_time.metadata import MetaData
-from categorical_from_binary.performance_over_time.plotter import plot_performance_over_time
+from categorical_from_binary.performance_over_time.plotter import (
+    plot_performance_over_time,
+)
 
 
 def _get_pandas_dataframe_or_return_none(
@@ -39,7 +41,7 @@ def make_performance_over_time_plots_from_dataframes_on_disk(
     Usage:
 
     ### first specify paths to dataframes
-    RESULTS_DIR="/Users/mwojno01/Repos/categorical_from_binary/data/results/arxiv_prep/cluster/larger_sims/"
+    RESULTS_DIR="/data/results/arxiv_prep/cluster/larger_sims/"
 
     dir_tail_to_cavi_probit="04_29_2022_15_27_05_MDT_ONLY_CAVI_PROBIT/result_data_frames/perf_cavi_probit.csv"
     dir_tail_to_gibbs="05_04_2022_08_18_44_MDT_ONLY_SOFTMAX_VIA_PGA_AND_GIBBS/result_data_frames/perf_softmax_via_pga_and_gibbs.csv"

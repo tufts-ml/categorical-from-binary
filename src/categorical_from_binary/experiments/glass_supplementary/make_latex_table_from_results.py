@@ -4,7 +4,9 @@ import pandas as pd
 
 # `PATH_TO_GLASS_IDENTIFICATION_RESULTS` should be the path to which the module
 # `experiments.glass_supplementary.main.run_many_inference_strategies` wrote results.
-PATH_TO_GLASS_IDENTIFICATION_RESULTS = "/Users/mwojno01/Repos/categorical_from_binary/data/results/glass_identification/glass_identification_results.csv"
+PATH_TO_GLASS_IDENTIFICATION_RESULTS = (
+    "data/results/glass_identification/glass_identification_results.csv"
+)
 df = pd.read_csv(PATH_TO_GLASS_IDENTIFICATION_RESULTS)
 
 # We make a table which uses hierarchical index names
