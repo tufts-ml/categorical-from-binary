@@ -1,6 +1,6 @@
 meta:
   purpose : "demo_cyber_locally" 
-  save_dir : "./data/results/arxiv_prep/demo_cyber_locally/"
+  save_dir : "./data/results/demo_cyber_locally/"
   
 data :
   cyber:

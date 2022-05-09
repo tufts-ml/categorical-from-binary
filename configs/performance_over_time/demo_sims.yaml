@@ -24,7 +24,7 @@ holdout_performance:
     link2 : 2 # SOFTMAX 
 
   cavi_probit:
-    n_iterations: 5 
+    n_iterations: 20
 
   cavi_logit:
       n_iterations: 1

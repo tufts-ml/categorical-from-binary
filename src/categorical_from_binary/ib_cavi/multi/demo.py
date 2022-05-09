@@ -1,3 +1,4 @@
+
 """
 Here we demo the predictive performance over time.
 """
@@ -8,10 +9,10 @@ from categorical_from_binary.data_generation.bayes_multiclass_reg import (
     Link,
     generate_multiclass_regression_dataset,
 )
-from categorical_from_binary.ib_cavi.multi.ib_probit.inference.main import (
-    compute_multiclass_probit_vi_with_normal_prior,
+from categorical_from_binary.ib_cavi.multi.inference import (
+    IB_Model,
+    compute_multiclass_vi_with_normal_prior,
 )
-
 
 ###
 # Construct dataset
@@ -46,7 +47,9 @@ labels_test = dataset.labels[n_train_samples:]
 ####
 # Variational Inference
 ####
-results = compute_multiclass_probit_vi_with_normal_prior(
+ib_model = IB_Model.PROBIT
+results = compute_multiclass_vi_with_normal_prior(
+    ib_model,
     labels_train,
     covariates_train,
     labels_test=labels_test,
@@ -56,3 +59,4 @@ results = compute_multiclass_probit_vi_with_normal_prior(
 )
 pd.set_option('display.max_columns', None)
 print(f"\n\nPerformance over time: \n {results.performance_over_time}")
+
