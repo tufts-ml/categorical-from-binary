@@ -32,6 +32,8 @@ def make_performance_over_time_plots_from_dataframes_on_disk(
     min_pct_iterates_with_non_nan_metrics_in_order_to_plot_curve: Optional[float] = 0.0,
     min_log_likelihood_for_y_axis: Optional[Union[float, str]] = None,
     max_log_likelihood_for_y_axis: Optional[float] = None,
+    CBC_name: str = "CBC",
+    CBM_name: str = "CBM",
 ):
     """
 
@@ -127,4 +129,6 @@ def make_performance_over_time_plots_from_dataframes_on_disk(
                 show_cb_logit=show_cb_logit,
                 label_advi_lrs_by_index=label_advi_lrs_by_index,
                 save_legend_separately=save_legend_separately,
+                CBC_name=CBC_name,
+                CBM_name=CBM_name,
             )

@@ -1,6 +1,6 @@
 meta:
   purpose : "demo_sims" 
-  save_dir : "./data/results/arxiv_prep/demo_sims/"
+  save_dir : "./data/results/demo_sims/"
 
 data :
   sim:

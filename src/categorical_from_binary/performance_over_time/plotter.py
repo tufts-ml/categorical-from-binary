@@ -12,7 +12,9 @@ sns.set(style="whitegrid")
 from pandas.core.frame import DataFrame
 
 from categorical_from_binary.io import ensure_dir
-from categorical_from_binary.performance_over_time.classes import PerformanceOverTimeResults
+from categorical_from_binary.performance_over_time.classes import (
+    PerformanceOverTimeResults,
+)
 
 
 # TODO: Don't REQUIRE IB-CAVI and ADVI to be here... make everything optional
@@ -37,6 +39,8 @@ def plot_performance_over_time(
     show_cb_logit: bool = True,
     label_advi_lrs_by_index: bool = False,
     save_legend_separately: bool = False,
+    CBC_name: str = "CBC",
+    CBM_name: str = "CBM",
 ) -> None:
     """
     Arguments:
@@ -50,6 +54,8 @@ def plot_performance_over_time(
         min_pct_iterates_with_non_nan_metrics_in_order_to_plot_curve: Optional float.
             Moving this up from the default of 0.0
             can prevent situations where we give legend entries to curves that are not there.
+        CBC_name: Can be set to "DO" for backwards compatability
+        CBM_name: Can be set to "SDO" for backwards compatability
     """
     plt.clf()
 
@@ -93,15 +99,15 @@ def plot_performance_over_time(
 
         # Pick link for CB-Probit using "cheap BMA"
         last_train_ll_CBC = df_performance_cavi_probit[
-            "train mean log likelihood with CBC_PROBIT"
+            f"train mean log likelihood with {CBC_name}_PROBIT"
         ].iloc[-1]
         last_train_ll_CBM = df_performance_cavi_probit[
-            "train mean log likelihood with CBM_PROBIT"
+            f"train mean log likelihood with {CBM_name}_PROBIT"
         ].iloc[-1]
         if last_train_ll_CBC > last_train_ll_CBM:
-            cb_probit_link_as_string_with_cheap_BMA = "CBC_PROBIT"
+            cb_probit_link_as_string_with_cheap_BMA = f"{CBC_name}_PROBIT"
         else:
-            cb_probit_link_as_string_with_cheap_BMA = "CBM_PROBIT"
+            cb_probit_link_as_string_with_cheap_BMA = f"{CBM_name}_PROBIT"
 
         # compute line to plot
         perf_cavi_probit = df_performance_cavi_probit
@@ -127,15 +133,15 @@ def plot_performance_over_time(
         if df_performance_cavi_logit is not None and show_cb_logit is True:
             # Pick link for CB-Logit using "cheap BMA"
             last_train_ll_CBC = df_performance_cavi_logit[
-                "train mean log likelihood with CBC_LOGIT"
+                f"train mean log likelihood with {CBC_name}_LOGIT"
             ].iloc[-1]
             last_train_ll_CBM = df_performance_cavi_logit[
-                "train mean log likelihood with CBM_LOGIT"
+                f"train mean log likelihood with {CBM_name}_LOGIT"
             ].iloc[-1]
             if last_train_ll_CBC > last_train_ll_CBM:
-                cb_logit_link_as_string_with_cheap_BMA = "CBC_LOGIT"
+                cb_logit_link_as_string_with_cheap_BMA = f"{CBC_name}_LOGIT"
             else:
-                cb_logit_link_as_string_with_cheap_BMA = "CBM_LOGIT"
+                cb_logit_link_as_string_with_cheap_BMA = f"{CBM_name}_LOGIT"
 
             perf_cavi_logit = df_performance_cavi_logit
             secs_cavi_logit = perf_cavi_logit["seconds elapsed"].to_numpy()
@@ -381,6 +387,8 @@ def plot_performance_over_time_results(
     max_log_likelihood_for_y_axis: Optional[float] = None,
     add_legend_to_plot: bool = True,
     show_cb_logit: bool = True,
+    CBC_name: str = "CBC",
+    CBM_name: str = "CBM",
 ):
     # convert advi_results_by_lr to df_performance_advi_by_lr
     # then we can feed `plot_performance_over_time` a DataFrame (or dict of DataFrames)
@@ -405,4 +413,6 @@ def plot_performance_over_time_results(
         max_log_likelihood_for_y_axis,
         add_legend_to_plot,
         show_cb_logit,
+        CBC_name,
+        CBM_name,
     )
