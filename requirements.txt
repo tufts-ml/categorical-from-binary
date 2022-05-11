@@ -10,7 +10,6 @@ numpyro
 openpyxl # to open csvs with pandas 
 pandas 
 pypolyagamma 
-pymc3==3.11.2 # a first stab at advi; this has been discarded in favor of my own wrapper around pytorch
 pydantic
 pyyaml
 recordclass

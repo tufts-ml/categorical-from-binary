@@ -12,4 +12,3 @@ pytest-watch
 pre-commit
 black; python_version >= '3.8'
 hypothesis 
-pypolyagamma # used to check consistency on some inference functions

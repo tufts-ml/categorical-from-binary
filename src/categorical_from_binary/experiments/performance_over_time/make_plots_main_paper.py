@@ -41,6 +41,48 @@ make_performance_over_time_plots_from_dataframes_on_disk(
 )
 
 
+### CYBER SIMS
+
+RESULTS_DIR = "data/results/arxiv_prep/cluster/cyber_346/"
+
+dir_tail_to_cavi_probit = (
+    "04_29_2022_22_00_54_MDT_ONLY_CAVI_PROBIT/result_data_frames/perf_cavi_probit.csv"
+)
+# dir_tail_to_gibbs="05_01_2022_23_44_02_MDT_ONLY_SOFTMAX_VIA_PGA_AND_GIBBS/result_data_frames/perf_softmax_via_pga_and_gibbs.csv"
+dir_tail_to_gibbs = "05_03_2022_03_13_51_MDT_ONLY_SOFTMAX_VIA_PGA_AND_GIBBS/result_data_frames/perf_softmax_via_pga_and_gibbs.csv"
+dir_tails_to_advi = {
+    0.1: "05_07_2022_01_01_52_MDT_ONLY_ADVI/result_data_frames/perf_advi_0.1.csv",
+    0.01: "05_06_2022_09_22_54_MDT_ONLY_ADVI/result_data_frames/perf_advi_0.01.csv",
+    1.0: "05_07_2022_09_10_17_MDT_ONLY_ADVI/result_data_frames/perf_advi_1.0.csv",
+    10.0: "05_01_2022_17_22_20_MDT_ONLY_ADVI/result_data_frames/perf_advi_10.0.csv",
+}
+dir_tail_to_nuts = "05_03_2022_17_15_26_MDT_ONLY_NUTS/result_data_frames/perf_nuts.csv"
+
+
+dir_tail_to_cavi_logit = None
+
+# plot configs
+dir_tail_for_writing_plots = "plots_new/"
+min_pct_iterates_with_non_nan_metrics_in_order_to_plot_curve = 0.5
+min_log_likelihood_for_y_axis = -10.0
+max_log_likelihood_for_y_axis = None
+
+make_performance_over_time_plots_from_dataframes_on_disk(
+    RESULTS_DIR,
+    dir_tail_to_cavi_probit,
+    dir_tail_to_cavi_logit,
+    dir_tail_to_nuts,
+    dir_tail_to_gibbs,
+    dir_tails_to_advi,
+    dir_tail_for_writing_plots,
+    min_pct_iterates_with_non_nan_metrics_in_order_to_plot_curve,
+    min_log_likelihood_for_y_axis,
+    max_log_likelihood_for_y_axis,
+    CBC_name="DO",
+    CBM_name="SDO",
+)
+
+
 ### SMALL SIMS
 
 RESULTS_DIR = "data/results/arxiv_prep/cluster/small_sims/"
