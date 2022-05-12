@@ -54,6 +54,7 @@ class CategoricalModelType(int, Enum):
     CBM_LOGIT = 5
     IB_LOGIT = 6
     SOFTMAX = 7  # softmax can also be considered non-identified multi-logit.
+    MULTI_LOGIT = 8  # multi-logit can be considered identified softmax
 
 
 def create_categorical_model(
@@ -79,52 +80,72 @@ def create_categorical_model(
     """
     K = np.shape(y_one_hot_NK)[1]
 
+    # L is the number of categories which AREN'T fixed to zero (for identifiability)
+    # by a given modeling approach
+    if categorical_model_type == CategoricalModelType.MULTI_LOGIT:
+        L = K - 1
+    else:
+        L = K
+
+    # (Possibly) add a column of ones to the design matrix
     if x_NM is None:
         x_NM = np.ones((N, 1))
     elif x_NM is not None and add_bias_to_design_matrix:
         x_NM = np.append(x_NM, np.ones(N, 1), 1)
     M = np.shape(x_NM)[1]
 
+    print(f"L={L}, M={M}")
     # Using MCH's naming convention here, which is to give the dimensionality of each array
     # after the last underscore
-    beta_KM = numpyro.sample(
-        "beta_KM", dist.Normal(prior_mean, prior_stddev).expand([K, M])
+    # TODO: Does this need to be transposed from how we usually do it (M x L)?
+    beta_LM = numpyro.sample(
+        "beta_LM", dist.Normal(prior_mean, prior_stddev).expand([L, M])
     )
-    utility_NK = jnp.dot(x_NM[:N], beta_KM.T)
+    print(f"shape of beta_LM: {np.shape(beta_LM)}")
+
+    utility_NL = jnp.dot(x_NM[:N], beta_LM.T)
+    # add in a zero utility for any category whose beta is fixed at zero.
+    if categorical_model_type == CategoricalModelType.MULTI_LOGIT:
+        utility_NK = np.append(np.zeros((N, 1)), utility_NL, 1)
+    else:
+        utility_NK = utility_NL
+
+    # breakpoint()
+
     if categorical_model_type == CategoricalModelType.IB_PROBIT:
         y_NK = numpyro.sample(
             "y_NK",
-            dist.Bernoulli(probs=jstats.norm.cdf(utility_NK)).expand([N, K]),
+            dist.Bernoulli(probs=jstats.norm.cdf(utility_NK)).expand([N, L]),
             obs=y_one_hot_NK[:N],
         )
         return
     elif categorical_model_type == CategoricalModelType.IB_LOGIT:
         y_NK = numpyro.sample(
             "y_NK",
-            dist.Bernoulli(probs=jstats.logistic.cdf(utility_NK)).expand([N, K]),
+            dist.Bernoulli(probs=jstats.logistic.cdf(utility_NK)).expand([N, L]),
             obs=y_one_hot_NK[:N],
         )
         return
     else:
         if categorical_model_type == CategoricalModelType.CBC_PROBIT:
-            p_unnormalized_NK = jstats.norm.cdf(utility_NK) / jstats.norm.cdf(
+            p_unnormalized_NL = jstats.norm.cdf(utility_NK) / jstats.norm.cdf(
                 -utility_NK
             )
         elif categorical_model_type == CategoricalModelType.CBM_PROBIT:
-            p_unnormalized_NK = jstats.norm.cdf(utility_NK)
+            p_unnormalized_NL = jstats.norm.cdf(utility_NK)
         elif categorical_model_type == CategoricalModelType.CBC_LOGIT:
-            p_unnormalized_NK = jstats.logistic.cdf(utility_NK) / jstats.logistic.cdf(
+            p_unnormalized_NL = jstats.logistic.cdf(utility_NK) / jstats.logistic.cdf(
                 -utility_NK
             )
         elif categorical_model_type == CategoricalModelType.CBM_LOGIT:
-            p_unnormalized_NK = jstats.logistic.cdf(utility_NK)
+            p_unnormalized_NL = jstats.logistic.cdf(utility_NK)
         elif categorical_model_type == CategoricalModelType.SOFTMAX:
-            p_unnormalized_NK = jnp.exp(utility_NK)
+            p_unnormalized_NL = jnp.exp(utility_NK)
 
-        p_NK = (p_unnormalized_NK.T / jnp.sum(p_unnormalized_NK, 1)).T
+        p_NL = (p_unnormalized_NL.T / jnp.sum(p_unnormalized_NL, 1)).T
         y_NK = numpyro.sample(  # noqa
             "y_NK",
-            dist.Categorical(probs=p_NK).expand([N]),
+            dist.Categorical(probs=p_NL).expand([N]),
             obs=y_one_hot_NK[:N].argmax(axis=1),
         )
 
@@ -135,7 +156,7 @@ def run_nuts_on_categorical_data(
     Nseen_list: List[int],
     create_categorical_model: Callable,
     categorical_model_type: CategoricalModelType,
-    y_train__one_hot_NK: np.array,
+    y_train__one_hot_NL: np.array,
     x_train_NM: Optional[np.array] = None,
     prior_mean: float = 0.0,
     prior_stddev: float = 1.0,
@@ -148,7 +169,7 @@ def run_nuts_on_categorical_data(
         Nseen_list: a List of integers. Each element in the list designates a subsample
             size for running NUTS. (The idea is that, downstream, we can investigate the results
             of inference for various sample sizes.)
-        y_train__one_hot_NK: an np.array with shape (N,K), where N is a number of samples and K is the
+        y_train__one_hot_NL: an np.array with shape (N,K), where N is a number of samples and K is the
             number of categories.  position (n,k) = 1 if the n-th sample used the k-th category, and is 0 otherwise.
             Thus, summing across columns produces a (N,)-shaped vector of all 1's.
         X_train_NM: numpy array with shape (N,M), where N is the number of samples and
@@ -169,8 +190,8 @@ def run_nuts_on_categorical_data(
     # convert to dense if sparse
     if isspmatrix(x_train_NM):
         x_train_NM = np.array(x_train_NM.todense())
-    if isspmatrix(y_train__one_hot_NK):
-        y_train__one_hot_NK = np.array(y_train__one_hot_NK.todense(), dtype=int)
+    if isspmatrix(y_train__one_hot_NL):
+        y_train__one_hot_NL = np.array(y_train__one_hot_NL.todense(), dtype=int)
 
     for _, Nseen in enumerate(Nseen_list):
 
@@ -184,12 +205,12 @@ def run_nuts_on_categorical_data(
         rng_key, rng_key_ = jax.random.split(rng_key)
         n_covariates, n_categories = (
             np.shape(x_train_NM)[1],
-            np.shape(y_train__one_hot_NK)[1],
+            np.shape(y_train__one_hot_NL)[1],
         )
         model_for_nuts = numpyro.infer.NUTS(
             create_categorical_model,
             init_strategy=init_to_value(
-                values={"beta_KM": jnp.zeros((n_categories, n_covariates))}
+                values={"beta_LM": jnp.zeros((n_categories, n_covariates))}
             ),
         )
         sampler = numpyro.infer.MCMC(
@@ -202,14 +223,14 @@ def run_nuts_on_categorical_data(
             categorical_model_type=categorical_model_type,
             prior_mean=prior_mean,
             prior_stddev=prior_stddev,
-            y_one_hot_NK=y_train__one_hot_NK,
+            y_one_hot_NK=y_train__one_hot_NL,
             x_NM=x_train_NM,
         )
 
         # S is the number of samples
-        # TODO: This function doesn't know anything about a `beta_KM`!!!  So the current factoring is not
+        # TODO: This function doesn't know anything about a `beta_LM`!!!  So the current factoring is not
         # appropriate.
-        beta_SKM = sampler.get_samples()["beta_KM"]
+        beta_SKM = sampler.get_samples()["beta_LM"]
         betas_SKM_by_N[Nseen] = beta_SKM
 
     return betas_SKM_by_N
