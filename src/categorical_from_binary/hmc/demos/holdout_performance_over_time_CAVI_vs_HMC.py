@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 
 from categorical_from_binary.data_generation.bayes_multiclass_reg import (
     Link,
@@ -61,7 +62,6 @@ results = compute_multiclass_probit_vi_with_normal_prior(
 )
 performance_over_time_CAVI = results.performance_over_time
 
-print(f"\n\nCAVI performance over time: \n {performance_over_time_CAVI }")
 
 ####
 # Hamiltonian Monte Carlo
@@ -97,4 +97,12 @@ holdout_performance_over_time_HMC = construct_performance_over_time_for_MCMC(
     n_warmup_samples=num_warmup,
     one_beta_sample_has_transposed_orientation=True,
 )
+
+###
+# Show results
+###
+
+pd.set_option("display.max_columns", None)
+pd.set_option("display.max_rows", 10)
 print(f"\n\nHMC holdout performance over time: \n {holdout_performance_over_time_HMC }")
+print(f"\n\nCAVI performance over time: \n {performance_over_time_CAVI }")

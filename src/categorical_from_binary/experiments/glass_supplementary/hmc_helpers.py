@@ -14,12 +14,14 @@ from typing import Union
 import jaxlib
 import numpy as np
 
+from categorical_from_binary.hmc.consts import (
+    CATEGORY_PROBABILITY_FUNCTION_BY_MODEL_TYPE,
+)
 from categorical_from_binary.hmc.core import (
     CategoricalModelType,
     create_categorical_model,
     run_nuts_on_categorical_data,
 )
-from categorical_from_binary.hmc.report import CATEGORY_PROBABILITY_FUNCTION_BY_MODEL_TYPE
 from categorical_from_binary.types import NumpyArray2D, NumpyArray3D
 
 
@@ -47,7 +49,7 @@ def get_beta_samples_for_categorical_model_via_HMC(
     """
     n_samples = np.shape(labels)[0]
     Nseen_list = [n_samples]
-    betas_SKM_by_N = run_nuts_on_categorical_data(
+    betas_SLM_by_N = run_nuts_on_categorical_data(
         num_warmup_samples,
         num_mcmc_samples,
         Nseen_list,
@@ -59,7 +61,7 @@ def get_beta_samples_for_categorical_model_via_HMC(
         prior_stddev,
         random_seed,
     )
-    betas_SKM = betas_SKM_by_N[n_samples]
+    betas_SKM = betas_SLM_by_N[n_samples]
     return np.swapaxes(betas_SKM, 1, 2)
 
 

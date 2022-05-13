@@ -57,6 +57,20 @@ class CategoricalModelType(int, Enum):
     MULTI_LOGIT = 8  # multi-logit can be considered identified softmax
 
 
+def _get_n_free_categories(
+    n_categories: int,
+    categorical_model_type: CategoricalModelType,
+) -> int:
+    """
+    `n_free_categories` is the number of categories which AREN'T fixed to zero (for identifiability)
+    by a given modeling approach
+    """
+    if categorical_model_type == CategoricalModelType.MULTI_LOGIT:
+        return n_categories - 1
+    else:
+        return n_categories
+
+
 def create_categorical_model(
     N: int,
     categorical_model_type: CategoricalModelType,
@@ -82,10 +96,7 @@ def create_categorical_model(
 
     # L is the number of categories which AREN'T fixed to zero (for identifiability)
     # by a given modeling approach
-    if categorical_model_type == CategoricalModelType.MULTI_LOGIT:
-        L = K - 1
-    else:
-        L = K
+    L = _get_n_free_categories(K, categorical_model_type)
 
     # (Possibly) add a column of ones to the design matrix
     if x_NM is None:
@@ -94,58 +105,58 @@ def create_categorical_model(
         x_NM = np.append(x_NM, np.ones(N, 1), 1)
     M = np.shape(x_NM)[1]
 
-    print(f"L={L}, M={M}")
     # Using MCH's naming convention here, which is to give the dimensionality of each array
     # after the last underscore
     # TODO: Does this need to be transposed from how we usually do it (M x L)?
     beta_LM = numpyro.sample(
         "beta_LM", dist.Normal(prior_mean, prior_stddev).expand([L, M])
     )
-    print(f"shape of beta_LM: {np.shape(beta_LM)}")
 
+    # get utility function (N,K)
     utility_NL = jnp.dot(x_NM[:N], beta_LM.T)
     # add in a zero utility for any category whose beta is fixed at zero.
     if categorical_model_type == CategoricalModelType.MULTI_LOGIT:
-        utility_NK = np.append(np.zeros((N, 1)), utility_NL, 1)
+        utility_NK = jnp.append(jnp.zeros((N, 1)), utility_NL, 1)
     else:
         utility_NK = utility_NL
-
-    # breakpoint()
 
     if categorical_model_type == CategoricalModelType.IB_PROBIT:
         y_NK = numpyro.sample(
             "y_NK",
-            dist.Bernoulli(probs=jstats.norm.cdf(utility_NK)).expand([N, L]),
+            dist.Bernoulli(probs=jstats.norm.cdf(utility_NK)).expand([N, K]),
             obs=y_one_hot_NK[:N],
         )
         return
     elif categorical_model_type == CategoricalModelType.IB_LOGIT:
         y_NK = numpyro.sample(
             "y_NK",
-            dist.Bernoulli(probs=jstats.logistic.cdf(utility_NK)).expand([N, L]),
+            dist.Bernoulli(probs=jstats.logistic.cdf(utility_NK)).expand([N, K]),
             obs=y_one_hot_NK[:N],
         )
         return
     else:
         if categorical_model_type == CategoricalModelType.CBC_PROBIT:
-            p_unnormalized_NL = jstats.norm.cdf(utility_NK) / jstats.norm.cdf(
+            p_unnormalized_NK = jstats.norm.cdf(utility_NK) / jstats.norm.cdf(
                 -utility_NK
             )
         elif categorical_model_type == CategoricalModelType.CBM_PROBIT:
-            p_unnormalized_NL = jstats.norm.cdf(utility_NK)
+            p_unnormalized_NK = jstats.norm.cdf(utility_NK)
         elif categorical_model_type == CategoricalModelType.CBC_LOGIT:
-            p_unnormalized_NL = jstats.logistic.cdf(utility_NK) / jstats.logistic.cdf(
+            p_unnormalized_NK = jstats.logistic.cdf(utility_NK) / jstats.logistic.cdf(
                 -utility_NK
             )
         elif categorical_model_type == CategoricalModelType.CBM_LOGIT:
-            p_unnormalized_NL = jstats.logistic.cdf(utility_NK)
-        elif categorical_model_type == CategoricalModelType.SOFTMAX:
-            p_unnormalized_NL = jnp.exp(utility_NK)
+            p_unnormalized_NK = jstats.logistic.cdf(utility_NK)
+        elif categorical_model_type in [
+            CategoricalModelType.SOFTMAX,
+            CategoricalModelType.MULTI_LOGIT,
+        ]:
+            p_unnormalized_NK = jnp.exp(utility_NK)
 
-        p_NL = (p_unnormalized_NL.T / jnp.sum(p_unnormalized_NL, 1)).T
+        p_NK = (p_unnormalized_NK.T / jnp.sum(p_unnormalized_NK, 1)).T
         y_NK = numpyro.sample(  # noqa
             "y_NK",
-            dist.Categorical(probs=p_NL).expand([N]),
+            dist.Categorical(probs=p_NK).expand([N]),
             obs=y_one_hot_NK[:N].argmax(axis=1),
         )
 
@@ -156,7 +167,7 @@ def run_nuts_on_categorical_data(
     Nseen_list: List[int],
     create_categorical_model: Callable,
     categorical_model_type: CategoricalModelType,
-    y_train__one_hot_NL: np.array,
+    y_train__one_hot_NK: np.array,
     x_train_NM: Optional[np.array] = None,
     prior_mean: float = 0.0,
     prior_stddev: float = 1.0,
@@ -185,13 +196,13 @@ def run_nuts_on_categorical_data(
         The initialization strategy is to initialize the regression weight matrix beta to all 0's.
     """
 
-    betas_SKM_by_N = dict()
+    betas_SLM_by_N = dict()
 
     # convert to dense if sparse
     if isspmatrix(x_train_NM):
         x_train_NM = np.array(x_train_NM.todense())
-    if isspmatrix(y_train__one_hot_NL):
-        y_train__one_hot_NL = np.array(y_train__one_hot_NL.todense(), dtype=int)
+    if isspmatrix(y_train__one_hot_NK):
+        y_train__one_hot_NK = np.array(y_train__one_hot_NK.todense(), dtype=int)
 
     for _, Nseen in enumerate(Nseen_list):
 
@@ -205,12 +216,13 @@ def run_nuts_on_categorical_data(
         rng_key, rng_key_ = jax.random.split(rng_key)
         n_covariates, n_categories = (
             np.shape(x_train_NM)[1],
-            np.shape(y_train__one_hot_NL)[1],
+            np.shape(y_train__one_hot_NK)[1],
         )
+        n_free_categories = _get_n_free_categories(n_categories, categorical_model_type)
         model_for_nuts = numpyro.infer.NUTS(
             create_categorical_model,
             init_strategy=init_to_value(
-                values={"beta_LM": jnp.zeros((n_categories, n_covariates))}
+                values={"beta_LM": jnp.zeros((n_free_categories, n_covariates))}
             ),
         )
         sampler = numpyro.infer.MCMC(
@@ -223,14 +235,14 @@ def run_nuts_on_categorical_data(
             categorical_model_type=categorical_model_type,
             prior_mean=prior_mean,
             prior_stddev=prior_stddev,
-            y_one_hot_NK=y_train__one_hot_NL,
+            y_one_hot_NK=y_train__one_hot_NK,
             x_NM=x_train_NM,
         )
 
         # S is the number of samples
         # TODO: This function doesn't know anything about a `beta_LM`!!!  So the current factoring is not
         # appropriate.
-        beta_SKM = sampler.get_samples()["beta_LM"]
-        betas_SKM_by_N[Nseen] = beta_SKM
+        beta_SLM = sampler.get_samples()["beta_LM"]
+        betas_SLM_by_N[Nseen] = beta_SLM
 
-    return betas_SKM_by_N
+    return betas_SLM_by_N
