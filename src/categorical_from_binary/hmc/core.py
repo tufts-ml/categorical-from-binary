@@ -18,12 +18,14 @@ Naming Conventions:
 """
 
 from enum import Enum
-from typing import Callable, Dict, List, Optional
+from typing import Callable, Dict, List, Optional, Union
 
 import jax
 import jax.numpy as jnp
 import jax.scipy.stats as jstats
 from scipy.sparse import isspmatrix
+
+from categorical_from_binary.data_generation.bayes_multiclass_reg import Link
 
 
 jax.config.update("jax_enable_x64", True)
@@ -41,31 +43,25 @@ import numpyro.infer
 from numpyro.infer import init_to_value
 
 
-class CategoricalModelType(int, Enum):
+class IB_Link(int, Enum):
     """
     NOTE:
         Inherting from `int` as well as `Enum` makes this json serializable
     """
 
-    CBC_PROBIT = 1
-    CBM_PROBIT = 2
-    IB_PROBIT = 3
-    CBC_LOGIT = 4
-    CBM_LOGIT = 5
-    IB_LOGIT = 6
-    SOFTMAX = 7  # softmax can also be considered non-identified multi-logit.
-    MULTI_LOGIT = 8  # multi-logit can be considered identified softmax
+    IB_PROBIT = 1
+    IB_LOGIT = 2
 
 
 def _get_n_free_categories(
     n_categories: int,
-    categorical_model_type: CategoricalModelType,
+    link_or_ib_link: Union[Link, IB_Link],
 ) -> int:
     """
     `n_free_categories` is the number of categories which AREN'T fixed to zero (for identifiability)
     by a given modeling approach
     """
-    if categorical_model_type == CategoricalModelType.MULTI_LOGIT:
+    if link_or_ib_link == Link.MULTI_LOGIT:
         return n_categories - 1
     else:
         return n_categories
@@ -73,7 +69,7 @@ def _get_n_free_categories(
 
 def create_categorical_model(
     N: int,
-    categorical_model_type: CategoricalModelType,
+    link_or_ib_link: Link,
     prior_mean: float,
     prior_stddev: float,
     y_one_hot_NK: Optional[np.array] = None,
@@ -92,11 +88,25 @@ def create_categorical_model(
         prior_mean: prior mean on the regression weights for each category
         prior_stddev: prior std on the regression weights for each category
     """
+    CURRENTLY_SUPPORTED_LINKS_AND_IB_LINKS = [
+        IB_Link.IB_PROBIT,
+        IB_Link.IB_LOGIT,
+        Link.CBC_PROBIT,
+        Link.CBM_PROBIT,
+        Link.CBC_LOGIT,
+        Link.CBM_LOGIT,
+        Link.MULTI_LOGIT,
+    ]
+    if link_or_ib_link not in CURRENTLY_SUPPORTED_LINKS_AND_IB_LINKS:
+        raise NotImplementedError(
+            f"Link {link_or_ib_link} is not in the list of currently supported links for ADVI.  Pick one of {CURRENTLY_SUPPORTED_LINKS_AND_IB_LINKS}."
+        )
+
     K = np.shape(y_one_hot_NK)[1]
 
     # L is the number of categories which AREN'T fixed to zero (for identifiability)
     # by a given modeling approach
-    L = _get_n_free_categories(K, categorical_model_type)
+    L = _get_n_free_categories(K, link_or_ib_link)
 
     # (Possibly) add a column of ones to the design matrix
     if x_NM is None:
@@ -114,20 +124,20 @@ def create_categorical_model(
 
     # get utility function (N,K)
     utility_NL = jnp.dot(x_NM[:N], beta_LM.T)
-    # add in a zero utility for any category whose beta is fixed at zero.
-    if categorical_model_type == CategoricalModelType.MULTI_LOGIT:
+    # add in a zero utility for the K-th category, whose beta is fixed at zero.
+    if link_or_ib_link == Link.MULTI_LOGIT:
         utility_NK = jnp.append(utility_NL, jnp.zeros((N, 1)), 1)
     else:
         utility_NK = utility_NL
 
-    if categorical_model_type == CategoricalModelType.IB_PROBIT:
+    if link_or_ib_link == IB_Link.IB_PROBIT:
         y_NK = numpyro.sample(
             "y_NK",
             dist.Bernoulli(probs=jstats.norm.cdf(utility_NK)).expand([N, K]),
             obs=y_one_hot_NK[:N],
         )
         return
-    elif categorical_model_type == CategoricalModelType.IB_LOGIT:
+    elif link_or_ib_link == IB_Link.IB_LOGIT:
         y_NK = numpyro.sample(
             "y_NK",
             dist.Bernoulli(probs=jstats.logistic.cdf(utility_NK)).expand([N, K]),
@@ -135,21 +145,21 @@ def create_categorical_model(
         )
         return
     else:
-        if categorical_model_type == CategoricalModelType.CBC_PROBIT:
+        if link_or_ib_link == Link.CBC_PROBIT:
             p_unnormalized_NK = jstats.norm.cdf(utility_NK) / jstats.norm.cdf(
                 -utility_NK
             )
-        elif categorical_model_type == CategoricalModelType.CBM_PROBIT:
+        elif link_or_ib_link == Link.CBM_PROBIT:
             p_unnormalized_NK = jstats.norm.cdf(utility_NK)
-        elif categorical_model_type == CategoricalModelType.CBC_LOGIT:
+        elif link_or_ib_link == Link.CBC_LOGIT:
             p_unnormalized_NK = jstats.logistic.cdf(utility_NK) / jstats.logistic.cdf(
                 -utility_NK
             )
-        elif categorical_model_type == CategoricalModelType.CBM_LOGIT:
+        elif link_or_ib_link == Link.CBM_LOGIT:
             p_unnormalized_NK = jstats.logistic.cdf(utility_NK)
-        elif categorical_model_type in [
-            CategoricalModelType.SOFTMAX,
-            CategoricalModelType.MULTI_LOGIT,
+        elif link_or_ib_link in [
+            Link.SOFTMAX,
+            Link.MULTI_LOGIT,
         ]:
             p_unnormalized_NK = jnp.exp(utility_NK)
 
@@ -166,7 +176,7 @@ def run_nuts_on_categorical_data(
     num_samples: int,
     Nseen_list: List[int],
     create_categorical_model: Callable,
-    categorical_model_type: CategoricalModelType,
+    link_or_ib_link: Link,
     y_train__one_hot_NK: np.array,
     x_train_NM: Optional[np.array] = None,
     prior_mean: float = 0.0,
@@ -218,7 +228,7 @@ def run_nuts_on_categorical_data(
             np.shape(x_train_NM)[1],
             np.shape(y_train__one_hot_NK)[1],
         )
-        n_free_categories = _get_n_free_categories(n_categories, categorical_model_type)
+        n_free_categories = _get_n_free_categories(n_categories, link_or_ib_link)
         model_for_nuts = numpyro.infer.NUTS(
             create_categorical_model,
             init_strategy=init_to_value(
@@ -232,7 +242,7 @@ def run_nuts_on_categorical_data(
         sampler.run(
             rng_key_,
             N=Nseen,
-            categorical_model_type=categorical_model_type,
+            link_or_ib_link=link_or_ib_link,
             prior_mean=prior_mean,
             prior_stddev=prior_stddev,
             y_one_hot_NK=y_train__one_hot_NK,

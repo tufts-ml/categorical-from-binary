@@ -19,7 +19,7 @@ from categorical_from_binary.datasets.glass_supplementary.load import (
     load_glass_identification_data,
 )
 from categorical_from_binary.experiments.glass_supplementary.hmc_helpers import (
-    CategoricalModelType,
+    Link,
     get_accuracy_from_beta_samples,
     get_beta_samples_for_categorical_model_via_HMC,
     get_mean_log_like_from_beta_samples,
@@ -105,7 +105,7 @@ for random_seed in range(num_data_splits):
     )(
         split_dataset.covariates_train,
         split_dataset.labels_train,
-        CategoricalModelType.CBC_PROBIT,
+        Link.CBC_PROBIT,
         num_warmup_samples,
         num_mcmc_samples,
     )
@@ -113,13 +113,13 @@ for random_seed in range(num_data_splits):
         beta_samples_CBC_probit,
         split_dataset.covariates_test,
         split_dataset.labels_test,
-        CategoricalModelType.CBC_PROBIT,
+        Link.CBC_PROBIT,
     )
     accuracy_CBC_probit_HMC = get_accuracy_from_beta_samples(
         beta_samples_CBC_probit,
         split_dataset.covariates_test,
         split_dataset.labels_test,
-        CategoricalModelType.CBC_PROBIT,
+        Link.CBC_PROBIT,
     )
 
     beta_samples_CBM_probit, time_for_CBM_probit_HMC = time_me(
@@ -127,7 +127,7 @@ for random_seed in range(num_data_splits):
     )(
         split_dataset.covariates_train,
         split_dataset.labels_train,
-        CategoricalModelType.CBM_PROBIT,
+        Link.CBM_PROBIT,
         num_warmup_samples,
         num_mcmc_samples,
     )
@@ -135,13 +135,13 @@ for random_seed in range(num_data_splits):
         beta_samples_CBM_probit,
         split_dataset.covariates_test,
         split_dataset.labels_test,
-        CategoricalModelType.CBM_PROBIT,
+        Link.CBM_PROBIT,
     )
     accuracy_CBM_probit_HMC = get_accuracy_from_beta_samples(
         beta_samples_CBM_probit,
         split_dataset.covariates_test,
         split_dataset.labels_test,
-        CategoricalModelType.CBM_PROBIT,
+        Link.CBM_PROBIT,
     )
 
     beta_samples_CBC_logit, time_for_CBC_logit_HMC = time_me(
@@ -149,7 +149,7 @@ for random_seed in range(num_data_splits):
     )(
         split_dataset.covariates_train,
         split_dataset.labels_train,
-        CategoricalModelType.CBC_LOGIT,
+        Link.CBC_LOGIT,
         num_warmup_samples,
         num_mcmc_samples,
     )
@@ -157,13 +157,13 @@ for random_seed in range(num_data_splits):
         beta_samples_CBC_logit,
         split_dataset.covariates_test,
         split_dataset.labels_test,
-        CategoricalModelType.CBC_LOGIT,
+        Link.CBC_LOGIT,
     )
     accuracy_CBC_logit_HMC = get_accuracy_from_beta_samples(
         beta_samples_CBC_logit,
         split_dataset.covariates_test,
         split_dataset.labels_test,
-        CategoricalModelType.CBC_LOGIT,
+        Link.CBC_LOGIT,
     )
 
     beta_samples_CBM_logit, time_for_CBM_logit_HMC = time_me(
@@ -171,7 +171,7 @@ for random_seed in range(num_data_splits):
     )(
         split_dataset.covariates_train,
         split_dataset.labels_train,
-        CategoricalModelType.CBM_LOGIT,
+        Link.CBM_LOGIT,
         num_warmup_samples,
         num_mcmc_samples,
     )
@@ -179,13 +179,13 @@ for random_seed in range(num_data_splits):
         beta_samples_CBM_logit,
         split_dataset.covariates_test,
         split_dataset.labels_test,
-        CategoricalModelType.CBM_LOGIT,
+        Link.CBM_LOGIT,
     )
     accuracy_CBM_logit_HMC = get_accuracy_from_beta_samples(
         beta_samples_CBM_logit,
         split_dataset.covariates_test,
         split_dataset.labels_test,
-        CategoricalModelType.CBM_LOGIT,
+        Link.CBM_LOGIT,
     )
 
     beta_samples_softmax, time_for_softmax_HMC = time_me(
@@ -193,7 +193,7 @@ for random_seed in range(num_data_splits):
     )(
         split_dataset.covariates_train,
         split_dataset.labels_train,
-        CategoricalModelType.SOFTMAX,
+        Link.SOFTMAX,
         num_warmup_samples,
         num_mcmc_samples,
     )
@@ -201,13 +201,13 @@ for random_seed in range(num_data_splits):
         beta_samples_softmax,
         split_dataset.covariates_test,
         split_dataset.labels_test,
-        CategoricalModelType.SOFTMAX,
+        Link.SOFTMAX,
     )
     accuracy_softmax_HMC = get_accuracy_from_beta_samples(
         beta_samples_softmax,
         split_dataset.covariates_test,
         split_dataset.labels_test,
-        CategoricalModelType.SOFTMAX,
+        Link.SOFTMAX,
     )
 
     results_by_fold["holdout_loglike_IB_Probit_plus_CBC"].append(

@@ -1,7 +1,7 @@
 import numpy as np
 
 from categorical_from_binary.hmc.core import (
-    CategoricalModelType,
+    Link,
     create_categorical_model,
     run_nuts_on_categorical_data,
 )
@@ -35,13 +35,13 @@ def test_hmc___demo_intercepts_only():
 
     num_warmup, num_mcmc_samples = 0, 10
     Nseen_list = [10]
-    categorical_model_type = CategoricalModelType.SOFTMAX
+    link = Link.SOFTMAX
     betas_SLM_by_N = run_nuts_on_categorical_data(
         num_warmup,
         num_mcmc_samples,
         Nseen_list,
         create_categorical_model,
-        categorical_model_type,
+        link,
         y_train__one_hot_NK,
         random_seed=random_seed,
     )

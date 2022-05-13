@@ -12,7 +12,6 @@ from categorical_from_binary.experiments.posterior_approximation.helpers import 
     sample_beta_cavi,
 )
 from categorical_from_binary.hmc.core import (
-    CategoricalModelType,
     create_categorical_model,
     run_nuts_on_categorical_data,
 )
@@ -20,7 +19,6 @@ from categorical_from_binary.ib_cavi.multi.ib_probit.inference.main import (
     compute_multiclass_probit_vi_with_normal_prior,
 )
 from categorical_from_binary.kucukelbir.inference import (
-    Link2,
     Metadata,
     do_advi_inference_via_kucukelbir_algo,
 )
@@ -87,27 +85,27 @@ results = compute_multiclass_probit_vi_with_normal_prior(
 num_warmup, num_mcmc_samples = 300, 1000
 
 Nseen_list = [n_train_samples]
-categorical_model_types_for_nuts = [
-    CategoricalModelType.MULTI_LOGIT,
-    CategoricalModelType.CBC_PROBIT,
+links_for_nuts = [
+    Link.MULTI_LOGIT,
+    Link.CBC_PROBIT,
 ]
 
-for categorical_model_type_for_nuts in categorical_model_types_for_nuts:
+for link_for_nuts in links_for_nuts:
 
     beta_samples_NUTS_dict, time_for_nuts = time_me(run_nuts_on_categorical_data)(
         num_warmup,
         num_mcmc_samples,
         Nseen_list,
         create_categorical_model,
-        categorical_model_type_for_nuts,
+        link_for_nuts,
         labels_train,
         covariates_train,
         random_seed=0,
     )
     beta_samples_for_nuts = np.array(beta_samples_NUTS_dict[n_train_samples])  # L x M
     beta_samples_for_nuts = np.swapaxes(beta_samples_for_nuts, 1, 2)  # M x L
-    link_for_nuts = Link[categorical_model_type_for_nuts.name]
-    name_for_nuts = f"nuts_{categorical_model_type_for_nuts.name}"
+    link_for_nuts = Link[link_for_nuts.name]
+    name_for_nuts = f"nuts_{link_for_nuts.name}"
     beta_samples_and_link_by_method[name_for_nuts] = BetaSamplesAndLink(
         beta_samples_for_nuts, link_for_nuts
     )
@@ -115,7 +113,7 @@ for categorical_model_type_for_nuts in categorical_model_types_for_nuts:
 ###
 # ADVI Inference
 ###
-link2 = Link2.SOFTMAX  # Link2.CBC_PROBIT
+link = Link.SOFTMAX  # Link.CBC_PROBIT
 link_advi = Link.SOFTMAX
 lr = 1.0
 n_advi_iterations = 400
@@ -130,7 +128,7 @@ print(f"\r--- Now doing ADVI with lr {lr:.02f} ---")
     labels_train,
     covariates_train,
     metadata,
-    link2,
+    link,
     n_advi_iterations,
     lr,
     seed,
