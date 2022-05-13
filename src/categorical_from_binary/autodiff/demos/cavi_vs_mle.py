@@ -28,7 +28,7 @@ from categorical_from_binary.data_generation.bayes_multiclass_reg import (
     Link,
     construct_cbc_probit_probabilities,
     construct_cbm_probit_probabilities,
-    construct_softmax_probabilities,
+    construct_multi_logit_probabilities,
     generate_multiclass_regression_dataset,
 )
 from categorical_from_binary.ib_cavi.multi.ib_probit.inference.main import (
@@ -96,7 +96,9 @@ category_probs_CBM_with_CBM_MLE = construct_cbm_probit_probabilities(
     dataset.features, beta_star_CBM_MLE
 )
 
-category_probs_true = construct_softmax_probabilities(dataset.features, dataset.beta)
+category_probs_true = construct_multi_logit_probabilities(
+    dataset.features, dataset.beta
+)
 
 
 # Comparing IB beta to CBM/CBC beta is hard becuase of non-identifiability.  Very different betas

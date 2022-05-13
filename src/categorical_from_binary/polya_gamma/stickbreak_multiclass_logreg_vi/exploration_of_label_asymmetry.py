@@ -11,10 +11,12 @@ as well as we would have hoped, so we try to understand why.
 import numpy as np
 
 from categorical_from_binary.data_generation.bayes_multiclass_reg import (
-    construct_softmax_probabilities,
+    construct_multi_logit_probabilities,
     generate_multiclass_regression_dataset,
 )
-from categorical_from_binary.evaluate.multiclass import get_sklearn_category_probabilities
+from categorical_from_binary.evaluate.multiclass import (
+    get_sklearn_category_probabilities,
+)
 from categorical_from_binary.polya_gamma.stickbreak_multiclass_logreg_vi.inference import (
     PriorParameters_MulticlassLogisticRegression,
     run_polya_gamma_variational_inference_for_bayesian_multiclass_logistic_regression,
@@ -76,8 +78,10 @@ print(f"true: \n {dataset.beta}")
 print(f"variational: \n {np.transpose(variational_params.means_beta)}")
 
 ### compare category probs
-true_category_probs = construct_softmax_probabilities(dataset.features, dataset.beta)
-variational_category_probs = construct_softmax_probabilities(
+true_category_probs = construct_multi_logit_probabilities(
+    dataset.features, dataset.beta
+)
+variational_category_probs = construct_multi_logit_probabilities(
     dataset.features, np.transpose(variational_params.means_beta)
 )
 sklearn_category_probs = get_sklearn_category_probabilities(

@@ -542,7 +542,7 @@ def compute_linear_predictors_preventing_downstream_overflow(
     return eta
 
 
-def construct_softmax_probabilities(
+def construct_multi_logit_probabilities(
     features: NumpyArray2D,
     beta: NumpyArray2D,
 ) -> NumpyArray2D:
@@ -830,7 +830,7 @@ def _construct_general_cbm_probabilities(
 # Each value in the `CATEGORY_PROBABILITY_FUNCTION_BY_LINK` dictionary is a function
 # whose arguments are features : NumpyArray2D, betas :NumpyArray2D
 CATEGORY_PROBABILITY_FUNCTION_BY_LINK = {
-    Link.MULTI_LOGIT: construct_softmax_probabilities,
+    Link.MULTI_LOGIT: construct_multi_logit_probabilities,
     Link.MULTI_LOGIT_NON_IDENTIFIED: construct_non_identified_softmax_probabilities,
     Link.STICK_BREAKING: construct_stickbreaking_multinomial_probabilities,
     Link.CBC_PROBIT: construct_cbc_probit_probabilities,

@@ -30,7 +30,7 @@ from categorical_from_binary.data_generation.bayes_multiclass_reg import (
     Link,
     construct_cbc_probit_probabilities,
     construct_cbm_probit_probabilities,
-    construct_softmax_probabilities,
+    construct_multi_logit_probabilities,
     generate_multiclass_regression_dataset,
 )
 from categorical_from_binary.ib_cavi.multi.ib_probit.inference.main import (
@@ -133,7 +133,7 @@ def run_warping_simulations_on_softmax_data(
                         dataset.features, beta_star_IB_MLE
                     )
 
-                    category_probs_true = construct_softmax_probabilities(
+                    category_probs_true = construct_multi_logit_probabilities(
                         dataset.features, dataset.beta
                     )
 

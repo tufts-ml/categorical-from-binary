@@ -25,7 +25,9 @@ from pandas.core.frame import DataFrame
 from scipy.sparse import isspmatrix
 
 from categorical_from_binary.data_generation.bayes_multiclass_reg import Link
-from categorical_from_binary.performance_over_time.results import update_performance_results
+from categorical_from_binary.performance_over_time.results import (
+    update_performance_results,
+)
 from categorical_from_binary.types import JaxNumpyArray2D, NumpyArray1D, NumpyArray2D
 
 
@@ -145,7 +147,7 @@ def compute_linear_predictors_preventing_downstream_overflow(
     )
 
 
-def construct_softmax_probabilities_via_jax(
+def construct_jax_softmax_probabilities(
     features: JaxNumpyArray2D,
     beta: JaxNumpyArray2D,
 ) -> JaxNumpyArray2D:
@@ -235,7 +237,7 @@ def construct_multi_probit_probabilities(
 
 JAX_CATEGORY_PROBABILITY_FUNCTION_BY_LINK2 = {
     Link2.CBC_PROBIT: compute_CBC_probit_probabilities_using_jax,
-    Link2.SOFTMAX: construct_softmax_probabilities_via_jax,
+    Link2.SOFTMAX: construct_jax_softmax_probabilities,
     Link2.MNP: construct_multi_probit_probabilities,
 }
 

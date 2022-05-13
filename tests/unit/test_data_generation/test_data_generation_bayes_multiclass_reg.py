@@ -3,7 +3,7 @@ import pytest
 
 from categorical_from_binary.data_generation.bayes_multiclass_reg import (
     Link,
-    construct_softmax_probabilities,
+    construct_multi_logit_probabilities,
     construct_stickbreaking_multinomial_probabilities,
     generate_designed_features_and_multiclass_labels_for_autoregressive_case,
     generate_multiclass_labels_for_nonautoregressive_case,
@@ -46,11 +46,11 @@ def multiclass_logistic_regression_dataset():
     )
 
 
-def test_that_the_construct_softmax_probabilities_function_returns_object_whose_rows_sum_to_unity(
+def test_that_the_construct_multi_logit_probabilities_function_returns_object_whose_rows_sum_to_unity(
     multiclass_logistic_regression_dataset,
 ):
     dataset = multiclass_logistic_regression_dataset
-    probs = construct_softmax_probabilities(dataset.features, dataset.beta)
+    probs = construct_multi_logit_probabilities(dataset.features, dataset.beta)
     assert (np.sum(probs, 1) == 1.0).all()
 
 
