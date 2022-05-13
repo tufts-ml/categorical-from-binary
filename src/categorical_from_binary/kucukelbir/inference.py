@@ -76,7 +76,7 @@ class Link2(int, Enum):
 # See warnings in correspoding function for computing category probabilities
 LINK_FROM_LINK_2_NAME = {
     Link2.CBC_PROBIT.name: Link.CBC_PROBIT,
-    Link2.SOFTMAX.name: Link.MULTI_LOGIT_NON_IDENTIFIED,
+    Link2.SOFTMAX.name: Link.SOFTMAX,
     Link2.MNP.name: Link.MULTI_PROBIT,
 }
 

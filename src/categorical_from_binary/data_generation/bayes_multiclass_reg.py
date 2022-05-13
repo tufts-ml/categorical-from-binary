@@ -45,7 +45,7 @@ class Link(int, Enum):
     MULTI_PROBIT = 5
     CBC_LOGIT = 6
     CBM_LOGIT = 7
-    MULTI_LOGIT_NON_IDENTIFIED = 8
+    SOFTMAX = 8
 
 
 @dataclass
@@ -123,7 +123,7 @@ def get_num_beta_columns(link: Link, n_categories: int) -> int:
         or link == Link.MULTI_PROBIT
         or link == Link.CBC_LOGIT
         or link == Link.CBM_LOGIT
-        or link == Link.MULTI_LOGIT_NON_IDENTIFIED
+        or link == Link.SOFTMAX
     ):
         num_beta_columns = n_categories
     else:
@@ -283,7 +283,7 @@ def generate_intercepts(
         or link == Link.MULTI_PROBIT
         or link == Link.CBC_LOGIT
         or link == Link.CBM_LOGIT
-        or link == Link.MULTI_LOGIT_NON_IDENTIFIED
+        or link == Link.SOFTMAX
     ):
         # TODO: Make this not hardcoded....Probably should create a NamedTuple where one specifies
         # The link function and the prior mean nad variance on the beta's before sampling.
@@ -831,7 +831,7 @@ def _construct_general_cbm_probabilities(
 # whose arguments are features : NumpyArray2D, betas :NumpyArray2D
 CATEGORY_PROBABILITY_FUNCTION_BY_LINK = {
     Link.MULTI_LOGIT: construct_multi_logit_probabilities,
-    Link.MULTI_LOGIT_NON_IDENTIFIED: construct_non_identified_softmax_probabilities,
+    Link.SOFTMAX: construct_non_identified_softmax_probabilities,
     Link.STICK_BREAKING: construct_stickbreaking_multinomial_probabilities,
     Link.CBC_PROBIT: construct_cbc_probit_probabilities,
     Link.CBM_PROBIT: construct_cbm_probit_probabilities,

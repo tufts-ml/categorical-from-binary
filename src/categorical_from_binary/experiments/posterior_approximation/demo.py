@@ -116,7 +116,7 @@ for categorical_model_type_for_nuts in categorical_model_types_for_nuts:
 # ADVI Inference
 ###
 link2 = Link2.SOFTMAX  # Link2.CBC_PROBIT
-link_advi = Link.MULTI_LOGIT_NON_IDENTIFIED
+link_advi = Link.SOFTMAX
 lr = 1.0
 n_advi_iterations = 400
 metadata = Metadata(num_mcmc_samples, n_features, n_categories, include_intercept)

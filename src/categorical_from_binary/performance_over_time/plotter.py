@@ -168,9 +168,7 @@ def plot_performance_over_time(
             secs_advi = perf_advi["seconds elapsed"].to_numpy()
             secs_advi[0] = EPSILON_TO_AVOID_EXACT_ZERO_SECONDS_WHEN_LOGGING
             # TODO: Don't hardcode the link here
-            metric_advi = perf_advi[
-                f"{metric_as_string} with MULTI_LOGIT_NON_IDENTIFIED"
-            ].to_numpy()
+            metric_advi = perf_advi[f"{metric_as_string} with SOFTMAX"].to_numpy()
             max_metric = np.nanmax([max_metric, np.nanmax(metric_advi)])
             min_metric = np.nanmin([min_metric, np.nanmin(metric_advi)])
             total_n_its = len(metric_advi)
@@ -205,9 +203,7 @@ def plot_performance_over_time(
             secs_nuts = perf_nuts["seconds elapsed"].to_numpy()
             # secs_nuts[0] = EPSILON_TO_AVOID_EXACT_ZERO_SECONDS_WHEN_LOGGING
             # TODO: don't hardcode the link here
-            metric_nuts = perf_nuts[
-                f"{metric_as_string} with MULTI_LOGIT_NON_IDENTIFIED"
-            ].to_numpy()
+            metric_nuts = perf_nuts[f"{metric_as_string} with SOFTMAX"].to_numpy()
             max_metric = np.nanmax([max_metric, np.nanmax(metric_nuts)])
             min_metric = np.nanmin([min_metric, np.nanmin(metric_nuts)])
             plt.plot(
@@ -228,9 +224,7 @@ def plot_performance_over_time(
             secs_gibbs = perf_gibbs["seconds elapsed"].to_numpy()
             # secs_gibbs[0] = EPSILON_TO_AVOID_EXACT_ZERO_SECONDS_WHEN_LOGGING
             # TODO: don't hardcode the link here
-            metric_gibbs = perf_gibbs[
-                f"{metric_as_string} with MULTI_LOGIT_NON_IDENTIFIED"
-            ].to_numpy()
+            metric_gibbs = perf_gibbs[f"{metric_as_string} with SOFTMAX"].to_numpy()
             max_metric = np.nanmax([max_metric, np.nanmax(metric_gibbs)])
             min_metric = np.nanmin([min_metric, np.nanmin(metric_gibbs)])
             plt.plot(

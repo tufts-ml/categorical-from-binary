@@ -159,7 +159,7 @@ def compute_performance_over_time(
             labels_train,
             covariates_test,
             labels_test,
-            Link.MULTI_LOGIT_NON_IDENTIFIED,
+            Link.SOFTMAX,
             stride=configs.nuts.stride_for_evaluating_holdout_performance,
             n_warmup_samples=configs.nuts.n_warmup,
             one_beta_sample_has_transposed_orientation=True,
@@ -200,7 +200,7 @@ def compute_performance_over_time(
             labels_train,
             covariates_test,
             labels_test,
-            Link.MULTI_LOGIT_NON_IDENTIFIED,
+            Link.SOFTMAX,
             stride=configs.pga_softmax_gibbs.stride_for_evaluating_holdout_performance,
             n_warmup_samples=num_burn_in,
         )

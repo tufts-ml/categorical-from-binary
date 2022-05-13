@@ -48,7 +48,7 @@ n_features = 40
 n_samples = 8000  # 800
 sigma_high = 2.0
 include_intercept = True
-link_for_data_generation = Link.MULTI_LOGIT_NON_IDENTIFIED
+link_for_data_generation = Link.SOFTMAX
 beta_category_strategy = ControlCategoryPredictability(
     scale_for_predictive_categories=sigma_high
 )
@@ -114,7 +114,7 @@ beta_posterior_mean_from_gibbs = np.mean(beta_samples[num_burn_in:], 0)
 probs_test_multi_logit_pga_gibbs = construct_category_probs(
     covariates_test,
     beta_posterior_mean_from_gibbs,
-    Link.MULTI_LOGIT_NON_IDENTIFIED,
+    Link.SOFTMAX,
 )
 probs_test_true = construct_category_probs(
     covariates_test,
@@ -165,7 +165,7 @@ holdout_performance_over_time_gibbs = construct_performance_over_time_for_MCMC(
     labels_train,
     covariates_test,
     labels_test,
-    Link.MULTI_LOGIT_NON_IDENTIFIED,
+    Link.SOFTMAX,
     stride=stride_for_evaluating_holdout_performance,
     n_warmup_samples=num_burn_in,
 )

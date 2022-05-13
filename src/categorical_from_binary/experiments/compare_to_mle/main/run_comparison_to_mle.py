@@ -170,7 +170,7 @@ def run_CAVI_vs_MLE_simulations(
         probs_test_softmax_MLE = construct_category_probs(
             covariates_test,
             beta_star_softmax_MLE,
-            Link.MULTI_LOGIT_NON_IDENTIFIED,
+            Link.SOFTMAX,
         )
 
         # Bayesian Model Averaging
