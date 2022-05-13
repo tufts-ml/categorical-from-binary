@@ -116,7 +116,7 @@ def create_categorical_model(
     utility_NL = jnp.dot(x_NM[:N], beta_LM.T)
     # add in a zero utility for any category whose beta is fixed at zero.
     if categorical_model_type == CategoricalModelType.MULTI_LOGIT:
-        utility_NK = jnp.append(jnp.zeros((N, 1)), utility_NL, 1)
+        utility_NK = jnp.append(utility_NL, jnp.zeros((N, 1)), 1)
     else:
         utility_NK = utility_NL
 
