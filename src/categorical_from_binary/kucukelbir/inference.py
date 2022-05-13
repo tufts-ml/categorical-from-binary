@@ -69,7 +69,7 @@ class Link2(int, Enum):
     # See warnings in correspoding function for computing category probabilities
     CBC_PROBIT = 1
     SOFTMAX = 2
-    MNP = 3
+    MULTI_PROBIT = 3
 
 
 # WARNING: I have doubts that `MNP` works correctly in this ADVI setting.
@@ -77,7 +77,7 @@ class Link2(int, Enum):
 LINK_FROM_LINK_2_NAME = {
     Link2.CBC_PROBIT.name: Link.CBC_PROBIT,
     Link2.SOFTMAX.name: Link.SOFTMAX,
-    Link2.MNP.name: Link.MULTI_PROBIT,
+    Link2.MULTI_PROBIT.name: Link.MULTI_PROBIT,
 }
 
 
@@ -238,7 +238,7 @@ def construct_multi_probit_probabilities(
 JAX_CATEGORY_PROBABILITY_FUNCTION_BY_LINK2 = {
     Link2.CBC_PROBIT: compute_CBC_probit_probabilities_using_jax,
     Link2.SOFTMAX: construct_jax_softmax_probabilities,
-    Link2.MNP: construct_multi_probit_probabilities,
+    Link2.MULTI_PROBIT: construct_multi_probit_probabilities,
 }
 
 ### ### ### ###
@@ -434,6 +434,7 @@ def do_advi_inference_via_kucukelbir_algo(
             Evaluate performance every `eval_every`th iteration
 
     """
+
     # set random number generator
     rng_key = jax.random.PRNGKey(random_seed)
 
