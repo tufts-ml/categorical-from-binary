@@ -63,7 +63,7 @@ def compute_ib_cavi_with_normal_prior(
     )
 
 
-def sdo_link_from_ib_model(ib_model: IB_Model):
+def cbm_link_from_ib_model(ib_model: IB_Model):
     if ib_model == IB_Model.LOGIT:
         return Link.CBM_LOGIT
     elif ib_model == IB_Model.PROBIT:
@@ -72,7 +72,7 @@ def sdo_link_from_ib_model(ib_model: IB_Model):
         raise ValueError
 
 
-def do_link_from_ib_model(ib_model: IB_Model):
+def cbc_link_from_ib_model(ib_model: IB_Model):
     if ib_model == IB_Model.LOGIT:
         return Link.CBC_LOGIT
     elif ib_model == IB_Model.PROBIT:

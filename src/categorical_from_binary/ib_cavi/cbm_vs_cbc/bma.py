@@ -13,8 +13,8 @@ from categorical_from_binary.ib_cavi.cbm_vs_cbc.real_elbo import (
 )
 from categorical_from_binary.ib_cavi.multi.inference import (
     IB_Model,
-    do_link_from_ib_model,
-    sdo_link_from_ib_model,
+    cbc_link_from_ib_model,
+    cbm_link_from_ib_model,
 )
 from categorical_from_binary.ib_cavi.multi.structs import VariationalBeta
 from categorical_from_binary.types import NumpyArray2D
@@ -35,20 +35,20 @@ def compute_weight_on_CBC_from_bayesian_model_averaging(
     The Bayesian Model Averaging is approximate because we use ELBO_m as approximations to
     the evidence p_m(x) for models m in set(CBM, CBC).
     """
-    sdo_link = sdo_link_from_ib_model(ib_model)
-    do_link = do_link_from_ib_model(ib_model)
+    cbm_link = cbm_link_from_ib_model(ib_model)
+    cbc_link = cbc_link_from_ib_model(ib_model)
 
     elbo_hat_CBM = approximate_true_elbo_with_samples(
         covariates_train,
         labels_train,
-        sdo_link,
+        cbm_link,
         variational_beta,
         n_monte_carlo_samples,
     )
     elbo_hat_CBC = approximate_true_elbo_with_samples(
         covariates_train,
         labels_train,
-        do_link,
+        cbc_link,
         variational_beta,
         n_monte_carlo_samples,
     )
@@ -67,12 +67,12 @@ def construct_category_probabilities_from_bayesian_model_averaging(
     ib_model: IB_Model,
 ) -> NumpyArray2D:
 
-    sdo_link = sdo_link_from_ib_model(ib_model)
-    do_link = do_link_from_ib_model(ib_model)
+    cbm_link = cbm_link_from_ib_model(ib_model)
+    cbc_link = cbc_link_from_ib_model(ib_model)
     probs_CBM = construct_category_probs(
-        covariates, variational_beta_point_estimate, sdo_link
+        covariates, variational_beta_point_estimate, cbm_link
     )
     probs_CBC = construct_category_probs(
-        covariates, variational_beta_point_estimate, do_link
+        covariates, variational_beta_point_estimate, cbc_link
     )
     return CBC_weight * probs_CBC + (1 - CBC_weight) * probs_CBM
