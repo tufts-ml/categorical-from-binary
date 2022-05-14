@@ -137,7 +137,6 @@ def compute_performance_over_time(
     if configs.nuts is not None and (
         only_run_this_inference is None or only_run_this_inference == InferenceType.NUTS
     ):
-
         n_train_samples = np.shape(labels_train)[0]
         Nseen_list = [n_train_samples]
         beta_samples_NUTS_dict, time_for_NUTS = time_me(run_nuts_on_categorical_data)(
@@ -159,7 +158,7 @@ def compute_performance_over_time(
             labels_train,
             covariates_test,
             labels_test,
-            Link.SOFTMAX,
+            configs.nuts.link,
             stride=configs.nuts.stride_for_evaluating_holdout_performance,
             n_warmup_samples=configs.nuts.n_warmup,
             one_beta_sample_has_transposed_orientation=True,

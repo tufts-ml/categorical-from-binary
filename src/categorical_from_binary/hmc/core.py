@@ -96,10 +96,11 @@ def create_categorical_model(
         Link.CBC_LOGIT,
         Link.CBM_LOGIT,
         Link.MULTI_LOGIT,
+        Link.SOFTMAX,
     ]
     if link_or_ib_link not in CURRENTLY_SUPPORTED_LINKS_AND_IB_LINKS:
         raise NotImplementedError(
-            f"Link {link_or_ib_link} is not in the list of currently supported links for ADVI.  Pick one of {CURRENTLY_SUPPORTED_LINKS_AND_IB_LINKS}."
+            f"Link {link_or_ib_link} is not in the list of currently supported links for NUTS.  Pick one of {CURRENTLY_SUPPORTED_LINKS_AND_IB_LINKS}."
         )
 
     K = np.shape(y_one_hot_NK)[1]

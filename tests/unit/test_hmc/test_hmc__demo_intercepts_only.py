@@ -35,7 +35,7 @@ def test_hmc___demo_intercepts_only():
 
     num_warmup, num_mcmc_samples = 0, 10
     Nseen_list = [10]
-    link = Link.SOFTMAX
+    link = Link.MULTI_LOGIT
     betas_SLM_by_N = run_nuts_on_categorical_data(
         num_warmup,
         num_mcmc_samples,

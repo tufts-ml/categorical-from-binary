@@ -29,7 +29,7 @@ holdout_performance:
     n_warmup : 200
     n_mcmc_samples : 1000
     stride_for_evaluating_holdout_performance: 1
-    link: 7 # SOFTMAX 
+    link: 8 # SOFTMAX 
     seed : 0 
   
   pga_softmax_gibbs:
