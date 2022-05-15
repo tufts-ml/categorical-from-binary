@@ -46,6 +46,8 @@ class Link(int, Enum):
     CBC_LOGIT = 6
     CBM_LOGIT = 7
     SOFTMAX = 8
+    BMA_PROBIT = 9
+    BMA_LOGIT = 10
 
 
 @dataclass

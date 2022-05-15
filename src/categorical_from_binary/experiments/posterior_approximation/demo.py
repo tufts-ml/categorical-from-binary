@@ -7,6 +7,7 @@ from categorical_from_binary.data_generation.bayes_multiclass_reg import (
 )
 from categorical_from_binary.experiments.posterior_approximation.helpers import (
     BetaSamplesAndLink,
+    add_bma_to_cat_prob_data_by_method,
     construct_cat_prob_data_by_method,
     sample_beta_advi,
     sample_beta_cavi,
@@ -18,6 +19,7 @@ from categorical_from_binary.hmc.core import (
 from categorical_from_binary.ib_cavi.multi.ib_probit.inference.main import (
     compute_multiclass_probit_vi_with_normal_prior,
 )
+from categorical_from_binary.ib_cavi.multi.inference import IB_Model
 from categorical_from_binary.kucukelbir.inference import (
     Metadata,
     do_advi_inference_via_kucukelbir_algo,
@@ -42,7 +44,7 @@ n_train_samples = 900
 include_intercept = True
 link = Link.MULTI_LOGIT
 seed = 0
-scale_for_predictive_categories = 2.0
+scale_for_predictive_categories = 2.0  # 2.0
 beta_category_strategy = ControlCategoryPredictability(
     scale_for_predictive_categories=scale_for_predictive_categories
 )
@@ -180,6 +182,27 @@ sample_idx = 5
 feature_vector = np.array([dataset.features[sample_idx, :]])
 cat_prob_data_by_method = construct_cat_prob_data_by_method(
     feature_vector, beta_samples_and_link_by_method
+)
+
+# ADD BMA
+from categorical_from_binary.ib_cavi.cbm_vs_cbc.bma import (
+    compute_weight_on_CBC_from_bayesian_model_averaging,
+)
+
+
+n_monte_carlo_samples = 10
+ib_model = IB_Model.PROBIT  # TODO: Automatically extract this from the above.
+CBC_weight = compute_weight_on_CBC_from_bayesian_model_averaging(
+    covariates_train,
+    labels_train,
+    results.variational_params.beta,
+    n_monte_carlo_samples,
+    ib_model,
+)
+cat_prob_data_by_method = add_bma_to_cat_prob_data_by_method(
+    cat_prob_data_by_method,
+    CBC_weight,
+    ib_model,
 )
 
 

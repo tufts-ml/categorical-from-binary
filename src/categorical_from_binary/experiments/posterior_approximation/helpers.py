@@ -7,6 +7,7 @@ from categorical_from_binary.data_generation.bayes_multiclass_reg import (
     Link,
     construct_category_probs,
 )
+from categorical_from_binary.ib_cavi.multi.inference import IB_Model
 from categorical_from_binary.types import NumpyArray1D, NumpyArray2D, NumpyArray3D
 
 
@@ -105,4 +106,36 @@ def construct_cat_prob_data_by_method(
         cat_prob_data_by_method[method] = CatProbData(
             feature_vector, cat_prob_samples, bsl.link
         )
+    return cat_prob_data_by_method
+
+
+def add_bma_to_cat_prob_data_by_method(
+    cat_prob_data_by_method: Dict[str, CatProbData],
+    CBC_weight: float,
+    ib_model: IB_Model,
+) -> Dict[str, CatProbData]:
+    # TODO: Make method+link an actual class so we don't have to get the
+    # strings exactly right
+    if ib_model == IB_Model.PROBIT:
+        cbc_method = "ib_cavi_CBC_PROBIT"
+        cbm_method = "ib_cavi_CBM_PROBIT"
+        bma_method = "ib_cavi_BMA_PROBIT"
+        bma_link = Link.BMA_PROBIT
+    elif ib_model == IB_Model.LOGIT:
+        cbc_method = "ib_cavi_CBC_LOGIT"
+        cbm_method = "ib_cavi_CBM_LOGIT"
+        bma_method = "ib_cavi_BMA_LOGIT"
+        bma_link = Link.BMA_LOGIT
+    else:
+        raise ValueError("What is the ib_model?!")
+
+    feature_vector = cat_prob_data_by_method[cbc_method].feature_vector
+    samples_BMA = np.zeros_like(cat_prob_data_by_method[cbc_method].samples)
+    for i in range(len(samples_BMA)):
+        probs_CBC = cat_prob_data_by_method[cbc_method].samples[i]
+        probs_CBM = cat_prob_data_by_method[cbm_method].samples[i]
+        probs_BMA = CBC_weight * probs_CBC + (1 - CBC_weight) * probs_CBM
+        samples_BMA[i] = probs_BMA
+    cat_prob_data_with_bma = CatProbData(feature_vector, samples_BMA, bma_link)
+    cat_prob_data_by_method[bma_method] = cat_prob_data_with_bma
     return cat_prob_data_by_method
