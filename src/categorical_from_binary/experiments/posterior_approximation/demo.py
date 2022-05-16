@@ -16,6 +16,9 @@ from categorical_from_binary.hmc.core import (
     create_categorical_model,
     run_nuts_on_categorical_data,
 )
+from categorical_from_binary.ib_cavi.cbm_vs_cbc.bma import (
+    compute_weight_on_CBC_from_bayesian_model_averaging,
+)
 from categorical_from_binary.ib_cavi.multi.ib_probit.inference.main import (
     compute_multiclass_probit_vi_with_normal_prior,
 )
@@ -36,13 +39,13 @@ beta_samples_and_link_by_method = dict()
 ###
 # Construct dataset
 ###
-n_categories = 3
+n_categories = 4
 n_sparse_categories = 0
-n_features = 1
+n_features = 8
 n_samples = 1000
-n_train_samples = 900
+n_train_samples = int(0.8 * n_samples)
 include_intercept = True
-link = Link.MULTI_LOGIT
+link_true_model = Link.MULTI_LOGIT
 seed = 0
 scale_for_predictive_categories = 2.0  # 2.0
 beta_category_strategy = ControlCategoryPredictability(
@@ -54,7 +57,7 @@ dataset = generate_multiclass_regression_dataset(
     n_categories=n_categories,
     n_categories_where_all_beta_coefficients_are_sparse=n_sparse_categories,
     beta_0=None,
-    link=link,
+    link=link_true_model,
     seed=seed,
     include_intercept=include_intercept,
     beta_category_strategy=beta_category_strategy,
@@ -66,6 +69,7 @@ covariates_train = dataset.features[:n_train_samples]
 labels_train = dataset.labels[:n_train_samples]
 covariates_test = dataset.features[n_train_samples:]
 labels_test = dataset.labels[n_train_samples:]
+
 
 ####
 # IB-CAVI Inference
@@ -80,6 +84,17 @@ results = compute_multiclass_probit_vi_with_normal_prior(
 )
 
 
+# Get weights for BMA
+n_monte_carlo_samples = 10
+ib_model = IB_Model.PROBIT  # TODO: Automatically extract this from the above.
+CBC_weight = compute_weight_on_CBC_from_bayesian_model_averaging(
+    covariates_train,
+    labels_train,
+    results.variational_params.beta,
+    n_monte_carlo_samples,
+    ib_model,
+)
+
 ####
 # NUTS Inference
 ####
@@ -91,7 +106,6 @@ links_for_nuts = [
     Link.MULTI_LOGIT,
     Link.CBC_PROBIT,
 ]
-
 for link_for_nuts in links_for_nuts:
 
     beta_samples_NUTS_dict, time_for_nuts = time_me(run_nuts_on_categorical_data)(
@@ -107,7 +121,7 @@ for link_for_nuts in links_for_nuts:
     beta_samples_for_nuts = np.array(beta_samples_NUTS_dict[n_train_samples])  # L x M
     beta_samples_for_nuts = np.swapaxes(beta_samples_for_nuts, 1, 2)  # M x L
     link_for_nuts = Link[link_for_nuts.name]
-    name_for_nuts = f"nuts_{link_for_nuts.name}"
+    name_for_nuts = f"{link_for_nuts.name}+NUTS"
     beta_samples_and_link_by_method[name_for_nuts] = BetaSamplesAndLink(
         beta_samples_for_nuts, link_for_nuts
     )
@@ -115,10 +129,9 @@ for link_for_nuts in links_for_nuts:
 ###
 # ADVI Inference
 ###
-link = Link.SOFTMAX  # Link.CBC_PROBIT
-link_advi = Link.SOFTMAX
-lr = 1.0
-n_advi_iterations = 400
+link_advi = Link.CBC_PROBIT
+lr = 0.1
+n_advi_iterations = 1000
 metadata = Metadata(num_mcmc_samples, n_features, n_categories, include_intercept)
 
 print(f"\r--- Now doing ADVI with lr {lr:.02f} ---")
@@ -130,7 +143,7 @@ print(f"\r--- Now doing ADVI with lr {lr:.02f} ---")
     labels_train,
     covariates_train,
     metadata,
-    link,
+    link_advi,
     n_advi_iterations,
     lr,
     seed,
@@ -157,7 +170,7 @@ for i in range(num_mcmc_samples):
         beta_mean_cavi, beta_cov_across_M_for_all_K, seed=i
     )
 for link_cavi in [Link.CBC_PROBIT, Link.CBM_PROBIT]:
-    beta_samples_and_link_by_method[f"ib_cavi_{link_cavi.name}"] = BetaSamplesAndLink(
+    beta_samples_and_link_by_method[f"{link_cavi.name}+IB-CAVI"] = BetaSamplesAndLink(
         beta_samples_cavi, link_cavi
     )
 
@@ -169,7 +182,7 @@ for i in range(num_mcmc_samples):
     beta_samples_advi[i, :] = sample_beta_advi(
         beta_mean_ADVI_CBC, beta_stds_ADVI_CBC, seed=i
     )
-beta_samples_and_link_by_method[f"advi_{link_advi.name}"] = BetaSamplesAndLink(
+beta_samples_and_link_by_method[f"{link_advi.name}+ADVI"] = BetaSamplesAndLink(
     beta_samples_advi, link_advi
 )
 
@@ -178,27 +191,13 @@ beta_samples_and_link_by_method[f"advi_{link_advi.name}"] = BetaSamplesAndLink(
 # Get category probability samples for a FIXED covariate vector
 ###
 
-sample_idx = 5
+sample_idx = 4
 feature_vector = np.array([dataset.features[sample_idx, :]])
 cat_prob_data_by_method = construct_cat_prob_data_by_method(
     feature_vector, beta_samples_and_link_by_method
 )
 
 # ADD BMA
-from categorical_from_binary.ib_cavi.cbm_vs_cbc.bma import (
-    compute_weight_on_CBC_from_bayesian_model_averaging,
-)
-
-
-n_monte_carlo_samples = 10
-ib_model = IB_Model.PROBIT  # TODO: Automatically extract this from the above.
-CBC_weight = compute_weight_on_CBC_from_bayesian_model_averaging(
-    covariates_train,
-    labels_train,
-    results.variational_params.beta,
-    n_monte_carlo_samples,
-    ib_model,
-)
 cat_prob_data_by_method = add_bma_to_cat_prob_data_by_method(
     cat_prob_data_by_method,
     CBC_weight,
