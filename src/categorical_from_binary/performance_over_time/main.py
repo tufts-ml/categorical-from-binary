@@ -126,6 +126,7 @@ def run_performance_over_time_from_loaded_configs(
         (
             covariates,
             labels,
+            user_domain,
         ) = construct_process_start_features_and_labels_for_one_cyber_user(
             configs.data.cyber.path_to_human_process_start_data,
             configs.data.cyber.subset_initial_user_idx_when_sorting_most_to_fewest_events,
@@ -134,7 +135,7 @@ def run_performance_over_time_from_loaded_configs(
             configs.data.cyber.window_size,
             configs.data.cyber.temperature,
             configs.data.cyber.include_intercept,
-        )
+        )  # noqa
 
         # Prep training / test split
         n_train_samples = int(configs.data.cyber.pct_training * np.shape(covariates)[0])
