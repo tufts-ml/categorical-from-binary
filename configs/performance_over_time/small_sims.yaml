@@ -21,7 +21,7 @@ holdout_performance:
       - 0.01 
       - 0.1 
       - 1 
-    link2 : 2 # SOFTMAX 
+    link : 8 # SOFTMAX 
 
   cavi_probit:
     n_iterations: 1000
@@ -33,7 +33,7 @@ holdout_performance:
     n_warmup : 200
     n_mcmc_samples : 1000 
     stride_for_evaluating_holdout_performance: 1
-    categorical_model_type: 7 # SOFTMAX 
+    link: 8 # SOFTMAX 
     seed : 0 
 
   pga_softmax_gibbs:

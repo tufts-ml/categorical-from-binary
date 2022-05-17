@@ -7,7 +7,6 @@ from categorical_from_binary.ib_cavi.multi.ib_probit.inference.main import (
     compute_multiclass_probit_vi_with_normal_prior,
 )
 from categorical_from_binary.kucukelbir.inference import (
-    Link2,
     Metadata,
     do_advi_inference_via_kucukelbir_algo,
 )
@@ -52,7 +51,7 @@ labels_test = dataset.labels[n_train_samples:]
 random_seed = 0
 n_advi_iterations = 100
 lr = 0.1
-link2 = Link2.SOFTMAX
+link = Link.SOFTMAX
 
 # do inference
 metadata = Metadata(n_samples, n_features, n_categories, include_intercept)
@@ -64,7 +63,7 @@ metadata = Metadata(n_samples, n_features, n_categories, include_intercept)
     labels_train,
     covariates_train,
     metadata,
-    link2,
+    link,
     n_advi_iterations,
     lr,
     random_seed,

@@ -5,7 +5,6 @@ from categorical_from_binary.data_generation.bayes_multiclass_reg import (
     generate_multiclass_regression_dataset,
 )
 from categorical_from_binary.hmc.core import (
-    CategoricalModelType,
     create_categorical_model,
     run_nuts_on_categorical_data,
 )
@@ -119,7 +118,7 @@ print(f"{metrics}")
 num_total = 100
 
 # common stuff
-categorical_model_type = CategoricalModelType.CBC_PROBIT
+link = Link.CBC_PROBIT
 Nseen_list = [n_train_samples]
 
 ### Short Warmup
@@ -133,7 +132,7 @@ beta_samples_HMC_dict_short_warmup, time_for_HMC_short_warmup = time_me(
     num_post_warmup,
     Nseen_list,
     create_categorical_model,
-    categorical_model_type,
+    link,
     labels_train,
     covariates_train,
     random_seed=0,
@@ -171,7 +170,7 @@ print(
 #     num_post_warmup,
 #     Nseen_list,
 #     create_categorical_model,
-#     categorical_model_type,
+#     link,
 #     labels_train,
 #     covariates_train,
 #     random_seed=0,

@@ -31,9 +31,9 @@ from categorical_from_binary.ib_cavi.cbm_vs_cbc.bma import (
 )
 from categorical_from_binary.ib_cavi.multi.inference import (
     IB_Model,
+    cbc_link_from_ib_model,
+    cbm_link_from_ib_model,
     compute_ib_cavi_with_normal_prior,
-    do_link_from_ib_model,
-    sdo_link_from_ib_model,
 )
 
 
@@ -98,8 +98,8 @@ for (s, dgc) in enumerate(data_generation_configs):
     covariates_test = dataset.features[n_train_samples:]
     labels_test = dataset.labels[n_train_samples:]
 
-    sdo_link = sdo_link_from_ib_model(ib_model)
-    do_link = do_link_from_ib_model(ib_model)
+    cbm_link = cbm_link_from_ib_model(ib_model)
+    cbc_link = cbc_link_from_ib_model(ib_model)
 
     results = compute_ib_cavi_with_normal_prior(
         ib_model,
@@ -130,12 +130,12 @@ for (s, dgc) in enumerate(data_generation_configs):
     probs_CBM = construct_category_probs(
         covariates_test,
         variational_beta.mean,
-        link=sdo_link,
+        link=cbm_link,
     )
     probs_CBC = construct_category_probs(
         covariates_test,
         variational_beta.mean,
-        link=do_link,
+        link=cbc_link,
     )
     probs_BMA = construct_category_probabilities_from_bayesian_model_averaging(
         covariates_test,

@@ -1,11 +1,11 @@
 import numpy as np
+import pandas as pd
 
 from categorical_from_binary.data_generation.bayes_multiclass_reg import (
     Link,
     generate_multiclass_regression_dataset,
 )
 from categorical_from_binary.hmc.core import (
-    CategoricalModelType,
     create_categorical_model,
     run_nuts_on_categorical_data,
 )
@@ -61,7 +61,6 @@ results = compute_multiclass_probit_vi_with_normal_prior(
 )
 performance_over_time_CAVI = results.performance_over_time
 
-print(f"\n\nCAVI performance over time: \n {performance_over_time_CAVI }")
 
 ####
 # Hamiltonian Monte Carlo
@@ -71,13 +70,13 @@ num_warmup, num_mcmc_samples = 300, 1000
 stride_for_evaluating_holdout_performance = num_mcmc_samples / 20
 
 Nseen_list = [n_train_samples]
-categorical_model_type = CategoricalModelType.CBC_PROBIT
+link = Link.CBC_PROBIT
 beta_samples_HMC_dict, time_for_HMC = time_me(run_nuts_on_categorical_data)(
     num_warmup,
     num_mcmc_samples,
     Nseen_list,
     create_categorical_model,
-    categorical_model_type,
+    link,
     labels_train,
     covariates_train,
     random_seed=0,
@@ -97,4 +96,12 @@ holdout_performance_over_time_HMC = construct_performance_over_time_for_MCMC(
     n_warmup_samples=num_warmup,
     one_beta_sample_has_transposed_orientation=True,
 )
+
+###
+# Show results
+###
+
+pd.set_option("display.max_columns", None)
+pd.set_option("display.max_rows", 10)
 print(f"\n\nHMC holdout performance over time: \n {holdout_performance_over_time_HMC }")
+print(f"\n\nCAVI performance over time: \n {performance_over_time_CAVI }")

@@ -17,8 +17,13 @@ from categorical_from_binary.io import ensure_dir, write_json
 from categorical_from_binary.metrics import Metrics, compute_metrics
 from categorical_from_binary.mst_time import get_mst_time
 from categorical_from_binary.performance_over_time.classes import InferenceType
-from categorical_from_binary.performance_over_time.configs_util import Configs, load_configs
-from categorical_from_binary.performance_over_time.core import compute_performance_over_time
+from categorical_from_binary.performance_over_time.configs_util import (
+    Configs,
+    load_configs,
+)
+from categorical_from_binary.performance_over_time.core import (
+    compute_performance_over_time,
+)
 from categorical_from_binary.performance_over_time.metadata import MetaData
 from categorical_from_binary.performance_over_time.plotter import (
     plot_performance_over_time_results,
@@ -232,6 +237,7 @@ def run_performance_over_time_from_loaded_configs(
                     min_log_likelihood_for_y_axis=configs.plot.min_log_likelihood_for_y_axis,
                     add_legend_to_plot=add_legend_to_plot,
                     show_cb_logit=show_cb_logit,
+                    nuts_link_name=configs.holdout_performance.nuts.link.name,
                 )
 
 

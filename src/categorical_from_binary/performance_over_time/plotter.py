@@ -41,6 +41,7 @@ def plot_performance_over_time(
     save_legend_separately: bool = False,
     CBC_name: str = "CBC",
     CBM_name: str = "CBM",
+    nuts_link_name: str = "SOFTMAX",
 ) -> None:
     """
     Arguments:
@@ -56,7 +57,14 @@ def plot_performance_over_time(
             can prevent situations where we give legend entries to curves that are not there.
         CBC_name: Can be set to "DO" for backwards compatability
         CBM_name: Can be set to "SDO" for backwards compatability
+        nuts_link_name: Can be set to something other than "SOFTMAX" (which was used in the experiments);
+            Need to extend code so we can have various links for other methods too (at least ADVI)
     """
+    # TODO: This function currently makes some assumptions about which links were used with which inference
+    # methods (e.g., softmax for ADVI).   Relax those -- just need to be able to grab the links from
+    # the configs (as written to disk if plotting retroactively), so that the code doesn't error out
+    # when trying to grab pandas columns that don't exist
+
     plt.clf()
 
     EPSILON_TO_AVOID_EXACT_ZERO_SECONDS_WHEN_LOGGING = (
@@ -168,9 +176,7 @@ def plot_performance_over_time(
             secs_advi = perf_advi["seconds elapsed"].to_numpy()
             secs_advi[0] = EPSILON_TO_AVOID_EXACT_ZERO_SECONDS_WHEN_LOGGING
             # TODO: Don't hardcode the link here
-            metric_advi = perf_advi[
-                f"{metric_as_string} with MULTI_LOGIT_NON_IDENTIFIED"
-            ].to_numpy()
+            metric_advi = perf_advi[f"{metric_as_string} with SOFTMAX"].to_numpy()
             max_metric = np.nanmax([max_metric, np.nanmax(metric_advi)])
             min_metric = np.nanmin([min_metric, np.nanmin(metric_advi)])
             total_n_its = len(metric_advi)
@@ -206,14 +212,17 @@ def plot_performance_over_time(
             # secs_nuts[0] = EPSILON_TO_AVOID_EXACT_ZERO_SECONDS_WHEN_LOGGING
             # TODO: don't hardcode the link here
             metric_nuts = perf_nuts[
-                f"{metric_as_string} with MULTI_LOGIT_NON_IDENTIFIED"
+                f"{metric_as_string} with {nuts_link_name}"
             ].to_numpy()
             max_metric = np.nanmax([max_metric, np.nanmax(metric_nuts)])
             min_metric = np.nanmin([min_metric, np.nanmin(metric_nuts)])
+            link_name_formatted_for_legend = (
+                nuts_link_name[0].upper() + nuts_link_name[1:].lower()
+            )
             plt.plot(
                 secs_nuts,
                 metric_nuts,
-                label="Softmax+NUTS",
+                label=f"{link_name_formatted_for_legend}+NUTS",
                 linewidth=4,
                 color=colors_for_other_methods[-1],
                 # alpha=1.0 - 1 / (len(colors_for_other_methods) + 1),
@@ -228,9 +237,7 @@ def plot_performance_over_time(
             secs_gibbs = perf_gibbs["seconds elapsed"].to_numpy()
             # secs_gibbs[0] = EPSILON_TO_AVOID_EXACT_ZERO_SECONDS_WHEN_LOGGING
             # TODO: don't hardcode the link here
-            metric_gibbs = perf_gibbs[
-                f"{metric_as_string} with MULTI_LOGIT_NON_IDENTIFIED"
-            ].to_numpy()
+            metric_gibbs = perf_gibbs[f"{metric_as_string} with SOFTMAX"].to_numpy()
             max_metric = np.nanmax([max_metric, np.nanmax(metric_gibbs)])
             min_metric = np.nanmin([min_metric, np.nanmin(metric_gibbs)])
             plt.plot(
@@ -387,8 +394,11 @@ def plot_performance_over_time_results(
     max_log_likelihood_for_y_axis: Optional[float] = None,
     add_legend_to_plot: bool = True,
     show_cb_logit: bool = True,
+    label_advi_lrs_by_index: bool = False,
+    save_legend_separately: bool = False,
     CBC_name: str = "CBC",
     CBM_name: str = "CBM",
+    nuts_link_name: str = "SOFTMAX",
 ):
     # convert advi_results_by_lr to df_performance_advi_by_lr
     # then we can feed `plot_performance_over_time` a DataFrame (or dict of DataFrames)
@@ -413,6 +423,9 @@ def plot_performance_over_time_results(
         max_log_likelihood_for_y_axis,
         add_legend_to_plot,
         show_cb_logit,
-        CBC_name,
-        CBM_name,
+        label_advi_lrs_by_index,
+        save_legend_separately,
+        CBC_name=CBC_name,
+        CBM_name=CBM_name,
+        nuts_link_name=nuts_link_name,
     )

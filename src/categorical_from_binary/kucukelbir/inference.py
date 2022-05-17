@@ -12,7 +12,6 @@ import sys
 import time
 import warnings
 from dataclasses import dataclass
-from enum import Enum
 from typing import Optional, Tuple
 
 import jax
@@ -25,7 +24,9 @@ from pandas.core.frame import DataFrame
 from scipy.sparse import isspmatrix
 
 from categorical_from_binary.data_generation.bayes_multiclass_reg import Link
-from categorical_from_binary.performance_over_time.results import update_performance_results
+from categorical_from_binary.performance_over_time.results import (
+    update_performance_results,
+)
 from categorical_from_binary.types import JaxNumpyArray2D, NumpyArray1D, NumpyArray2D
 
 
@@ -38,45 +39,6 @@ class Metadata:
     M: int  # num covariates
     K: int  # num predictors
     include_intercept: bool
-
-
-###
-# JAX versions of category probability constructions
-###
-
-# TODO:  Align this with what's in bayes_multiclass_reg.
-# Perhaps make a switch that allows one to choose between np.array and jnp.array
-
-
-# Each value in the `CATEGORY_PROBABILITY_FUNCTION_BY_LINK` dictionary is a function
-# whose arguments are features : NumpyArray2D, betas :NumpyArray2D
-
-
-class Link2(int, Enum):
-    """
-    Eventually want to combine this with Link
-    in data generation subpackage. The naming has evolved
-    overtime and I don't want to refactor the entire package right now,
-    because I'm trying to meet the ICML rebuttal period deadline.
-
-    NOTE:
-        Inherting from `int` as well as `Enum` makes this json serializable
-    """
-
-    # WARNING: I have doubts that `MNP` works correctly in this ADVI setting.
-    # See warnings in correspoding function for computing category probabilities
-    CBC_PROBIT = 1
-    SOFTMAX = 2
-    MNP = 3
-
-
-# WARNING: I have doubts that `MNP` works correctly in this ADVI setting.
-# See warnings in correspoding function for computing category probabilities
-LINK_FROM_LINK_2_NAME = {
-    Link2.CBC_PROBIT.name: Link.CBC_PROBIT,
-    Link2.SOFTMAX.name: Link.MULTI_LOGIT_NON_IDENTIFIED,
-    Link2.MNP.name: Link.MULTI_PROBIT,
-}
 
 
 def compute_CBC_probit_probabilities_using_jax(
@@ -145,7 +107,7 @@ def compute_linear_predictors_preventing_downstream_overflow(
     )
 
 
-def construct_softmax_probabilities_via_jax(
+def construct_jax_softmax_probabilities(
     features: JaxNumpyArray2D,
     beta: JaxNumpyArray2D,
 ) -> JaxNumpyArray2D:
@@ -233,10 +195,10 @@ def construct_multi_probit_probabilities(
     return category_probs
 
 
-JAX_CATEGORY_PROBABILITY_FUNCTION_BY_LINK2 = {
-    Link2.CBC_PROBIT: compute_CBC_probit_probabilities_using_jax,
-    Link2.SOFTMAX: construct_softmax_probabilities_via_jax,
-    Link2.MNP: construct_multi_probit_probabilities,
+JAX_CATEGORY_PROBABILITY_FUNCTION_BY_LINK = {
+    Link.CBC_PROBIT: compute_CBC_probit_probabilities_using_jax,
+    Link.SOFTMAX: construct_jax_softmax_probabilities,
+    Link.MULTI_PROBIT: construct_multi_probit_probabilities,
 }
 
 ### ### ### ###
@@ -295,7 +257,7 @@ def compute_log_like(
     data: Tuple[jnp.array, jnp.array],
     full_train_size: int,
     metadata,
-    link2: Link2,
+    link: Link,
 ):
     # TODO: full_train_size can now be obtained from metadata!
     X, y = data[0], data[1]  # unpack tuple
@@ -303,7 +265,7 @@ def compute_log_like(
         beta_flattened, metadata.M, metadata.K, metadata.include_intercept
     )
     # cat_probs = compute_CBC_probabilities_using_jax(X, beta_matrix)
-    function_to_make_cat_probs = JAX_CATEGORY_PROBABILITY_FUNCTION_BY_LINK2[link2]
+    function_to_make_cat_probs = JAX_CATEGORY_PROBABILITY_FUNCTION_BY_LINK[link]
     cat_probs = function_to_make_cat_probs(X, beta_matrix)
     N_batch = len(y)
     unit_likelihoods_for_this_batch = cat_probs[jnp.arange(N_batch), y]
@@ -325,9 +287,9 @@ def compute_log_joint(
     data: Tuple[jnp.array, jnp.array],
     full_data_size: int,
     metadata,
-    link2: Link2,
+    link: Link,
 ):
-    ll = compute_log_like(beta_flattened, data, full_data_size, metadata, link2)
+    ll = compute_log_like(beta_flattened, data, full_data_size, metadata, link)
     lp = compute_log_prior(beta_flattened)
     return ll + lp
 
@@ -373,7 +335,7 @@ def initialize_emas_and_return_rng_key(
     data_train,
     full_train_size,
     metadata,
-    link2: Link2,
+    link: Link,
 ):
     P = get_P(metadata.M, metadata.K, metadata.include_intercept)
     eps, rng_key = sample_from_standard_gaussian_P_times_and_return_new_rng_key(
@@ -386,7 +348,7 @@ def initialize_emas_and_return_rng_key(
         data_train,
         full_train_size,
         metadata,
-        link2,
+        link,
     )
 
     #  these formulas for gradients work because we're taking one MC sample; see document.
@@ -415,7 +377,7 @@ def do_advi_inference_via_kucukelbir_algo(
     labels_train: NumpyArray1D,
     covariates_train: NumpyArray2D,
     metadata: Metadata,
-    link2: Link2,
+    link: Link,
     n_advi_iterations: int,
     lr: float,
     random_seed: int,
@@ -432,6 +394,16 @@ def do_advi_inference_via_kucukelbir_algo(
             Evaluate performance every `eval_every`th iteration
 
     """
+    CURRENTLY_SUPPORTED_LINKS = [Link.CBC_PROBIT, Link.SOFTMAX, Link.MULTI_PROBIT]
+    if link not in CURRENTLY_SUPPORTED_LINKS:
+        raise NotImplementedError(
+            f"Link {link} is not in the list of currently supported links for ADVI.  Pick one of {CURRENTLY_SUPPORTED_LINKS}."
+        )
+    if link == Link.MULTI_PROBIT:
+        warnings.warn(
+            "I have doubts that `Link.MULTI_PROBIT` works correctly in this ADVI setting."
+        )
+
     # set random number generator
     rng_key = jax.random.PRNGKey(random_seed)
 
@@ -465,14 +437,13 @@ def do_advi_inference_via_kucukelbir_algo(
 
     # initialize ema for variational parameters
     ema_mus, ema_omegas, rng_key = initialize_emas_and_return_rng_key(
-        rng_key, mus, omegas, data_train, full_train_size, metadata, link2
+        rng_key, mus, omegas, data_train, full_train_size, metadata, link
     )
 
     # Prepare performance results
     performance_over_time_as_dict = collections.defaultdict(list)
     elapsed_time_for_advi_iterations = 0.0
     beta_mean = np.array(beta_matrix_from_vector(mus, M, K, include_intercept))
-    link = LINK_FROM_LINK_2_NAME[link2.name]
     update_performance_results(
         performance_over_time_as_dict,
         covariates_train,
@@ -523,7 +494,7 @@ def do_advi_inference_via_kucukelbir_algo(
             data_train,
             full_train_size,
             metadata,
-            link2,
+            link,
         )
 
         # if jnp.isnan(grad_log_joint).any():
@@ -559,7 +530,7 @@ def do_advi_inference_via_kucukelbir_algo(
                 labels_train,
                 beta_mean,
                 elapsed_time_for_advi_iterations,
-                link=LINK_FROM_LINK_2_NAME[link2.name],
+                link=link,
                 covariates_test=covariates_test,
                 labels_test=labels_test,
             )

@@ -5,8 +5,6 @@ from pydantic import BaseModel
 
 from categorical_from_binary.data_generation.bayes_multiclass_reg import Link
 from categorical_from_binary.datasets.generic.load import Dataset
-from categorical_from_binary.hmc.core import CategoricalModelType
-from categorical_from_binary.kucukelbir.inference import Link2
 
 
 ###
@@ -59,7 +57,7 @@ class Data_Configs(BaseModel):
 class ADVI_Configs(BaseModel):
     n_iterations: int
     seed: int
-    link2: Link2
+    link: Link
     lrs: List[float]
 
 
@@ -81,7 +79,7 @@ class NUTS_Configs(BaseModel):
     n_warmup: int
     n_mcmc_samples: int
     stride_for_evaluating_holdout_performance: int
-    categorical_model_type: CategoricalModelType
+    link: Link
     seed: int
 
 

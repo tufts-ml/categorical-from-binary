@@ -14,19 +14,21 @@ from typing import Union
 import jaxlib
 import numpy as np
 
+from categorical_from_binary.hmc.consts import (
+    CATEGORY_PROBABILITY_FUNCTION_BY_MODEL_TYPE,
+)
 from categorical_from_binary.hmc.core import (
-    CategoricalModelType,
+    Link,
     create_categorical_model,
     run_nuts_on_categorical_data,
 )
-from categorical_from_binary.hmc.report import CATEGORY_PROBABILITY_FUNCTION_BY_MODEL_TYPE
 from categorical_from_binary.types import NumpyArray2D, NumpyArray3D
 
 
 def get_beta_samples_for_categorical_model_via_HMC(
     covariates: NumpyArray2D,
     labels: NumpyArray2D,
-    categorical_model_type: CategoricalModelType,
+    link: Link,
     num_warmup_samples: int,
     num_mcmc_samples: int,
     prior_mean: float = 0.0,
@@ -47,19 +49,19 @@ def get_beta_samples_for_categorical_model_via_HMC(
     """
     n_samples = np.shape(labels)[0]
     Nseen_list = [n_samples]
-    betas_SKM_by_N = run_nuts_on_categorical_data(
+    betas_SLM_by_N = run_nuts_on_categorical_data(
         num_warmup_samples,
         num_mcmc_samples,
         Nseen_list,
         create_categorical_model,
-        categorical_model_type,
+        link,
         labels,
         covariates,
         prior_mean,
         prior_stddev,
         random_seed,
     )
-    betas_SKM = betas_SKM_by_N[n_samples]
+    betas_SKM = betas_SLM_by_N[n_samples]
     return np.swapaxes(betas_SKM, 1, 2)
 
 
@@ -67,7 +69,7 @@ def get_mean_log_like_from_beta_samples(
     beta_samples: Union[NumpyArray3D, jaxlib.xla_extension.DeviceArray],
     covariates: NumpyArray2D,
     labels: NumpyArray2D,
-    categorical_model_type: CategoricalModelType,
+    link: Link,
 ) -> float:
     """
     Arguments:
@@ -84,9 +86,7 @@ def get_mean_log_like_from_beta_samples(
     if isinstance(beta_samples, jaxlib.xla_extension.DeviceArray):
         beta_samples = beta_samples.to_py()
     beta_mean = beta_samples.mean(axis=0)
-    category_probability_function = CATEGORY_PROBABILITY_FUNCTION_BY_MODEL_TYPE[
-        categorical_model_type
-    ]
+    category_probability_function = CATEGORY_PROBABILITY_FUNCTION_BY_MODEL_TYPE[link]
     category_probs = category_probability_function(covariates, beta_mean)
     choice_probs = category_probs[np.where(labels)]
     return np.mean(np.log(choice_probs))
@@ -96,7 +96,7 @@ def get_accuracy_from_beta_samples(
     beta_samples: Union[NumpyArray3D, jaxlib.xla_extension.DeviceArray],
     covariates: NumpyArray2D,
     labels: NumpyArray2D,
-    categorical_model_type: CategoricalModelType,
+    link: Link,
 ) -> float:
     """
     Arguments:
@@ -113,9 +113,7 @@ def get_accuracy_from_beta_samples(
     if isinstance(beta_samples, jaxlib.xla_extension.DeviceArray):
         beta_samples = beta_samples.to_py()
     beta_mean = beta_samples.mean(axis=0)
-    category_probability_function = CATEGORY_PROBABILITY_FUNCTION_BY_MODEL_TYPE[
-        categorical_model_type
-    ]
+    category_probability_function = CATEGORY_PROBABILITY_FUNCTION_BY_MODEL_TYPE[link]
     category_probs = category_probability_function(covariates, beta_mean)
     return np.mean(np.argmax(category_probs, 1) == np.where(labels)[1])
 
