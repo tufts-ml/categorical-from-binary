@@ -105,8 +105,16 @@ def test_generate_multiclass_labels_for_nonautoregressive_case():
     features_non_autoregressive = np.random.normal(
         loc=0, scale=1, size=(num_samples, num_features_nonautoregressive)
     )
-
-    for link in Link:
+    links_to_use = [
+        Link.MULTI_LOGIT,
+        Link.STICK_BREAKING,
+        Link.CBC_LOGIT,
+        Link.CBM_LOGIT,
+        Link.CBC_PROBIT,
+        Link.CBM_PROBIT,
+        Link.SOFTMAX,
+    ]
+    for link in links_to_use:
         num_beta_columns = get_num_beta_columns(link, num_categories)
         beta = np.random.normal(
             loc=0, scale=1, size=(num_features_nonautoregressive, num_beta_columns)
