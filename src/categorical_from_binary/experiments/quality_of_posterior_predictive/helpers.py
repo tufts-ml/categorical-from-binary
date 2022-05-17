@@ -1,7 +1,10 @@
+import collections
 from dataclasses import dataclass
-from typing import Dict
+from typing import Dict, List
 
 import numpy as np
+import pandas as pd
+from pandas.core.frame import DataFrame
 
 from categorical_from_binary.data_generation.bayes_multiclass_reg import (
     Link,
@@ -117,14 +120,14 @@ def add_bma_to_cat_prob_data_by_method(
     # TODO: Make method+link an actual class so we don't have to get the
     # strings exactly right
     if ib_model == IB_Model.PROBIT:
-        cbc_method = "ib_cavi_CBC_PROBIT"
-        cbm_method = "ib_cavi_CBM_PROBIT"
-        bma_method = "ib_cavi_BMA_PROBIT"
+        cbc_method = "CBC_PROBIT+IB-CAVI"
+        cbm_method = "CBM_PROBIT+IB-CAVI"
+        bma_method = "BMA_PROBIT+IB-CAVI"
         bma_link = Link.BMA_PROBIT
     elif ib_model == IB_Model.LOGIT:
-        cbc_method = "ib_cavi_CBC_LOGIT"
-        cbm_method = "ib_cavi_CBM_LOGIT"
-        bma_method = "ib_cavi_BMA_LOGIT"
+        cbc_method = "CBC_LOGIT+IB-CAVI"
+        cbm_method = "CBM_LOGIT+IB-CAVI"
+        bma_method = "BMA_LOGIT+IB-CAVI"
         bma_link = Link.BMA_LOGIT
     else:
         raise ValueError("What is the ib_model?!")
@@ -139,3 +142,58 @@ def add_bma_to_cat_prob_data_by_method(
     cat_prob_data_with_bma = CatProbData(feature_vector, samples_BMA, bma_link)
     cat_prob_data_by_method[bma_method] = cat_prob_data_with_bma
     return cat_prob_data_by_method
+
+
+def make_df_of_sampled_category_probs_for_each_method_and_covariate_vector(
+    covariates: NumpyArray2D,
+    CBC_weight: float,
+    beta_samples_and_link_by_method: Dict[str, BetaSamplesAndLink],
+    example_idxs: List[int],
+    colors_by_methods_to_plot: Dict[str, str],
+    n_categories: int,
+    num_mcmc_samples: int,
+    ib_model: IB_Model,
+) -> DataFrame:
+
+    # TODO: Autoinfer `n_categories` and `num_mcmc_samples`
+
+    d = collections.defaultdict(list)
+
+    ###
+    # Make flattened dataframe of posterior category prob samples for each sample (example) in example_idx
+    ###
+
+    K = n_categories
+    methods = list(colors_by_methods_to_plot.keys())
+
+    for example_idx in example_idxs:
+        print(
+            f"Obtaining sampled posterior category probabilities for example index {example_idx}"
+        )
+
+        ###
+        # Get posterior samples of category probs for one feature vector
+        ###
+        feature_vector = np.array([covariates[example_idx, :]])
+        cat_prob_data_by_method = construct_cat_prob_data_by_method(
+            feature_vector, beta_samples_and_link_by_method
+        )
+
+        cat_prob_data_by_method = add_bma_to_cat_prob_data_by_method(
+            cat_prob_data_by_method,
+            CBC_weight,
+            ib_model,
+        )
+
+        for k in range(K):
+            # TODO: auto infer num mcmc samples
+            for i in range(num_mcmc_samples):
+                for method in methods:
+                    d["prob"].append(cat_prob_data_by_method[method].samples[i, k])
+                    d["category"].append(k + 1)
+                    d["method"].append(method)
+                    d["example"].append(example_idx)
+    df = pd.DataFrame(d)
+    df["method"] = pd.Categorical(df.method)  # necessary?
+    df["category"] = pd.Categorical(df.category)  # necessary?
+    return df
