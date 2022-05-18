@@ -28,6 +28,7 @@ from categorical_from_binary.performance_over_time.results import (
     update_performance_results,
 )
 from categorical_from_binary.types import JaxNumpyArray2D, NumpyArray1D, NumpyArray2D
+from categorical_from_binary.vi_params import write_VI_params_from_ADVI_means_and_stds
 
 
 ###
@@ -387,6 +388,8 @@ def do_advi_inference_via_kucukelbir_algo(
     labels_test: Optional[NumpyArray2D] = None,
     covariates_test: Optional[NumpyArray2D] = None,
     eval_every: int = 1,
+    save_beta_every_secs: Optional[float] = None,
+    save_beta_dir: Optional[str] = None,
 ) -> Tuple[NumpyArray2D, NumpyArray2D]:
     """
     Arguments:
@@ -442,14 +445,14 @@ def do_advi_inference_via_kucukelbir_algo(
 
     # Prepare performance results
     performance_over_time_as_dict = collections.defaultdict(list)
-    elapsed_time_for_advi_iterations = 0.0
+    secs_elapsed_for_advi_iterations = 0.0
     beta_mean = np.array(beta_matrix_from_vector(mus, M, K, include_intercept))
     update_performance_results(
         performance_over_time_as_dict,
         covariates_train,
         labels_train,
         beta_mean,
-        elapsed_time_for_advi_iterations,
+        secs_elapsed_for_advi_iterations,
         link=link,
         covariates_test=covariates_test,
         labels_test=labels_test,
@@ -460,6 +463,9 @@ def do_advi_inference_via_kucukelbir_algo(
         f"train mean log likelihood with {link.name}"
     ][-1]
     print(f"Init training mean log like  : {mean_log_like_init :.02f}")
+
+    # Timer for saving betas
+    secs_elapsed_at_last_beta_save = 0.0
 
     for it in jnp.arange(1, n_advi_iterations + 1):
 
@@ -518,7 +524,7 @@ def do_advi_inference_via_kucukelbir_algo(
         omegas += rho_omegas * grad_omegas
 
         end_time_for_this_advi_iteration = time.time()
-        elapsed_time_for_advi_iterations += (
+        secs_elapsed_for_advi_iterations += (
             end_time_for_this_advi_iteration - start_time_for_this_advi_iteration
         )
 
@@ -529,12 +535,35 @@ def do_advi_inference_via_kucukelbir_algo(
                 covariates_train,
                 labels_train,
                 beta_mean,
-                elapsed_time_for_advi_iterations,
+                secs_elapsed_for_advi_iterations,
                 link=link,
                 covariates_test=covariates_test,
                 labels_test=labels_test,
             )
 
+        # save intermediate betas if desired
+        if save_beta_every_secs is not None:
+            if (
+                secs_elapsed_for_advi_iterations - secs_elapsed_at_last_beta_save
+                > save_beta_every_secs
+            ):
+                units_of_save_every = int(
+                    divmod(secs_elapsed_for_advi_iterations, save_beta_every_secs)[0]
+                )
+                time_info = f"save_every_secs={save_beta_every_secs}_units_of_save_every={units_of_save_every}_secs_elapsed={secs_elapsed_for_advi_iterations:.03f}"
+                # TODO: offload the details and repetition of constructing ADVI_Results to some other place
+                beta_mean = beta_matrix_from_vector(mus, M, K, include_intercept)
+                beta_stds = beta_matrix_from_vector(
+                    jnp.exp(omegas), M, K, include_intercept
+                )
+                write_VI_params_from_ADVI_means_and_stds(
+                    np.array(beta_mean),
+                    np.array(beta_stds),
+                    lr,
+                    save_beta_dir,
+                    time_info,
+                )
+                secs_elapsed_at_last_beta_save = secs_elapsed_for_advi_iterations
     beta_mean = beta_matrix_from_vector(mus, M, K, include_intercept)
     beta_stds = beta_matrix_from_vector(jnp.exp(omegas), M, K, include_intercept)
     holdout_performance_over_time = pd.DataFrame(performance_over_time_as_dict)
@@ -548,4 +577,4 @@ def do_advi_inference_via_kucukelbir_algo(
 class ADVI_Results:
     beta_mean_ADVI: NumpyArray2D
     beta_std_ADVI: NumpyArray2D
-    performance_ADVI: DataFrame
+    performance_ADVI: Optional[DataFrame] = None

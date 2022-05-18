@@ -145,6 +145,11 @@ def run_performance_over_time_from_loaded_configs(
         labels_test = labels[n_train_samples:]
 
     ###
+    # Data subset
+    ###
+    data_subset = user_domain if configs.data.cyber is not None else ""
+
+    ###
     # Metadata
     ###
     # metadata includes performance of anchors: random guessing and, if applicable, data generating process
@@ -172,44 +177,50 @@ def run_performance_over_time_from_loaded_configs(
     print(f"Metadata for this dataset: {metadata}")
 
     ###
-    # Run holdout performance
+    # Construct directory for saving results
     ###
-
-    performance_over_time_results = compute_performance_over_time(
-        covariates_train,
-        labels_train,
-        covariates_test,
-        labels_test,
-        configs.holdout_performance,
-        only_run_this_inference,
-    )
-
-    ###
-    # Save artifacts
-    ###
-
     mst_time = get_mst_time()
     inference_used = (
         "all"
         if only_run_this_inference is None
         else f"ONLY_{only_run_this_inference.name}"
     )
-    save_dir_with_purpose_and_time_and_inference_used = (
-        f"{configs.meta.save_dir}/{mst_time}_{inference_used}/"
+    save_dir_with_purpose_and_subset_and_time_and_inference_used = os.path.join(
+        f"{configs.meta.save_dir}", data_subset, f"{mst_time}_{inference_used}"
     )
-    ensure_dir(save_dir_with_purpose_and_time_and_inference_used)
+    ensure_dir(save_dir_with_purpose_and_subset_and_time_and_inference_used)
+
+    ###
+    # Run holdout performance
+    ###
+    performance_over_time_results = compute_performance_over_time(
+        covariates_train,
+        labels_train,
+        covariates_test,
+        labels_test,
+        configs.holdout_performance,
+        save_dir_with_purpose_and_subset_and_time_and_inference_used,
+        only_run_this_inference,
+    )
+
+    ###
+    # Save other artifacts
+    ###
 
     # Configs
     write_json(
         configs.dict(),
-        os.path.join(save_dir_with_purpose_and_time_and_inference_used, "configs.json"),
+        os.path.join(
+            save_dir_with_purpose_and_subset_and_time_and_inference_used, "configs.json"
+        ),
     )
 
     # Metadata
     write_json(
         metadata.__dict__,
         os.path.join(
-            save_dir_with_purpose_and_time_and_inference_used, "metadata.json"
+            save_dir_with_purpose_and_subset_and_time_and_inference_used,
+            "metadata.json",
         ),
     )
 
@@ -217,18 +228,20 @@ def run_performance_over_time_from_loaded_configs(
     write_performance_over_time_results(
         performance_over_time_results,
         os.path.join(
-            save_dir_with_purpose_and_time_and_inference_used, "result_data_frames"
+            save_dir_with_purpose_and_subset_and_time_and_inference_used,
+            "result_data_frames",
         ),
     )
 
     # Plots
-    if make_plots:
+    if make_plots and configs.plot is not None:
         for show_cb_logit in [True, False]:
             for add_legend_to_plot in [True, False]:
                 plot_performance_over_time_results(
                     performance_over_time_results,
                     os.path.join(
-                        save_dir_with_purpose_and_time_and_inference_used, "plots"
+                        save_dir_with_purpose_and_subset_and_time_and_inference_used,
+                        "plots",
                     ),
                     metadata.mean_log_like_data_generating_process,
                     metadata.accuracy_data_generating_process,

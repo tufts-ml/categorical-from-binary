@@ -22,12 +22,14 @@ holdout_performance:
       - 0.1 
       - 1 
     link : 8 # SOFTMAX 
+    save_beta_every_secs : 0.1
 
   cavi_probit:
     n_iterations: 20
+    save_beta_every_secs : .001
 
   cavi_logit:
-      n_iterations: 1
+    n_iterations: 1
 
   nuts : 
     n_warmup : 10
@@ -41,7 +43,7 @@ holdout_performance:
     pct_burn_in: 0.0
     stride_for_evaluating_holdout_performance: 1
 
-plot:
-  min_pct_iterates_with_non_nan_metrics_in_order_to_plot_curve : 0.5 
-  min_log_likelihood_for_y_axis : "random guessing"
+# plot:
+#   min_pct_iterates_with_non_nan_metrics_in_order_to_plot_curve : 0.5 
+#   min_log_likelihood_for_y_axis : "random guessing"
 

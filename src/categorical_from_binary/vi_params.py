@@ -14,7 +14,9 @@ import scipy
 from scipy.sparse import spmatrix
 
 from categorical_from_binary.ib_cavi.multi.structs import CAVI_Results
-from categorical_from_binary.kucukelbir.inference import ADVI_Results
+
+# from categorical_from_binary.kucukelbir.inference import ADVI_Results
+from categorical_from_binary.io import ensure_dir
 from categorical_from_binary.types import NumpyArray2D, NumpyArray3D
 
 
@@ -53,54 +55,68 @@ class VI_Params:
             Shape: (M,K).
     """
 
+    VI_type: VI_Type
     mean: Union[NumpyArray2D, spmatrix]
     cov: Optional[Union[NumpyArray2D, NumpyArray3D, spmatrix]] = None
     stds: Optional[Union[NumpyArray2D, spmatrix]] = None
-    VI_type: VI_Type
     VI_hyperparams: Optional[str] = ""  # e.g. learning rate for ADVI
-    data_subset: Optional[str] = ""  # e.g. user_domain for cyber
 
 
 def VI_params_from_CAVI_results(
     CAVI_results: CAVI_Results,
-    data_subset: Optional[str] = "",
 ):
     return VI_Params(
+        VI_type=VI_Type.IB_CAVI,
         mean=CAVI_results.variational_params.beta.mean,
         cov=CAVI_results.variational_params.beta.cov,
         stds=None,
-        VI_type=VI_Type.IB_CAVI,
         VI_hyperparams="",
-        data_subset=data_subset,
     )
 
 
-def VI_params_from_ADVI_results(
-    ADVI_results: ADVI_Results,
+# Removing due to circular import
+#
+# def VI_params_from_ADVI_results(
+#     ADVI_results: ADVI_Results,
+#     lr: float,
+# ):
+#     return VI_Params(
+#         VI_type=VI_Type.IB_CAVI,
+#         mean=ADVI_results.beta_mean_ADVI,
+#         cov=None,
+#         stds=ADVI_results.beta_std_ADVI,
+#         VI_hyperparams=f"lr={lr}",
+#     )
+
+
+def VI_params_from_ADVI_means_and_stds(
+    beta_mean_ADVI: NumpyArray2D,
+    beta_std_ADVI: NumpyArray2D,
     lr: float,
-    data_subset: Optional[str] = "",
 ):
     return VI_Params(
-        mean=ADVI_results.beta_mean_ADVI,
+        VI_type=VI_Type.ADVI,
+        mean=beta_mean_ADVI,
         cov=None,
-        stds=ADVI_results.beta_std_ADVI,
-        VI_type=VI_Type.IB_CAVI,
+        stds=beta_std_ADVI,
         VI_hyperparams=f"lr={lr}",
-        data_subset=data_subset,
     )
 
 
 def write_VI_params(
     VI_params: VI_Params,
     save_dir: str,
+    time_info: str,
 ) -> None:
     detailed_dir = os.path.join(
         save_dir,
-        VI_params.data_subset,
+        "betas",
         VI_params.VI_type.name,
         VI_params.VI_hyperparams,
-        "betas",
+        time_info,
     )
+
+    ensure_dir(detailed_dir)
 
     # Save beta mean
     beta_mean = VI_params.mean
@@ -133,17 +149,30 @@ def write_VI_params(
 def write_VI_params_from_CAVI_results(
     CAVI_results: CAVI_Results,
     save_dir: str,
-    data_subset: Optional[str] = "",
+    time_info: str,
 ):
-    VI_params = VI_params_from_CAVI_results(CAVI_results, data_subset)
-    write_VI_params(VI_params, save_dir)
+    VI_params = VI_params_from_CAVI_results(CAVI_results)
+    write_VI_params(VI_params, save_dir, time_info)
 
 
-def write_VI_params_from_ADVI_results(
-    ADVI_results: ADVI_Results,
+# Removing due to circular import
+#
+# def write_VI_params_from_ADVI_results(
+#     ADVI_results: ADVI_Results,
+#     lr: float,
+#     save_dir: str,
+#     time_info : str,
+# ):
+#     VI_params = VI_params_from_ADVI_results(ADVI_results, lr)
+#     write_VI_params(VI_params, save_dir, time_info)
+
+
+def write_VI_params_from_ADVI_means_and_stds(
+    beta_mean_ADVI: NumpyArray2D,
+    beta_std_ADVI: NumpyArray2D,
     lr: float,
     save_dir: str,
-    data_subset: Optional[str] = "",
+    time_info: str,
 ):
-    VI_params = VI_params_from_ADVI_results(ADVI_results, lr, data_subset)
-    write_VI_params(VI_params, save_dir)
+    VI_params = VI_params_from_ADVI_means_and_stds(beta_mean_ADVI, beta_std_ADVI, lr)
+    write_VI_params(VI_params, save_dir, time_info)

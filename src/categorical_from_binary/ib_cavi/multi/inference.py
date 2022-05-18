@@ -40,6 +40,8 @@ def compute_ib_cavi_with_normal_prior(
     prior_beta_mean: Optional[NumpyArray2D] = None,
     prior_beta_precision: Optional[NumpyArray2D] = None,
     variational_params_init: Optional[VariationalParams] = None,
+    save_beta_every_secs: Optional[float] = None,
+    save_beta_dir: Optional[str] = None,
     verbose: bool = True,
 ) -> CAVI_Results:
     if ib_model is IB_Model.PROBIT:
@@ -59,6 +61,8 @@ def compute_ib_cavi_with_normal_prior(
         prior_beta_mean,
         prior_beta_precision,
         variational_params_init,
+        save_beta_every_secs,
+        save_beta_dir,
         verbose,
     )
 

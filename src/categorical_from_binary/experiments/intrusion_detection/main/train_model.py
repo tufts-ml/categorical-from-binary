@@ -23,7 +23,7 @@ from categorical_from_binary.ib_cavi.multi.ib_probit.inference.main import (
 )
 from categorical_from_binary.io import ensure_dir, write_json
 from categorical_from_binary.pandas_helpers import keep_df_rows_by_column_values
-from categorical_from_binary.performance_over_time.vi_results import (
+from categorical_from_binary.performance_over_time.vi_params import (
     VI_results_from_CAVI_results,
     write_VI_results,
 )

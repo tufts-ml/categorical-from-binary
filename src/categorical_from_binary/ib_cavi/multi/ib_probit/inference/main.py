@@ -500,6 +500,8 @@ def compute_multiclass_probit_vi_with_normal_prior(
     prior_beta_mean: Optional[NumpyArray2D] = None,
     prior_beta_precision: Optional[NumpyArray2D] = None,
     variational_params_init: Optional[VariationalParams] = None,
+    save_beta_every_secs: Optional[float] = None,
+    save_beta_dir: Optional[str] = None,
     verbose: bool = True,
 ) -> CAVI_Results:
     """
@@ -541,5 +543,7 @@ def compute_multiclass_probit_vi_with_normal_prior(
         prior_beta_precision,
         variational_params_init,
         prior_type,
+        save_beta_every_secs=save_beta_every_secs,
+        save_beta_dir=save_beta_dir,
         verbose=verbose,
     )

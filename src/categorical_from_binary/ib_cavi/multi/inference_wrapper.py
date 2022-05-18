@@ -34,6 +34,7 @@ from categorical_from_binary.performance_over_time.results import (
 )
 from categorical_from_binary.selection.hyperparameters import Hyperparameters
 from categorical_from_binary.types import NumpyArray2D
+from categorical_from_binary.vi_params import write_VI_params_from_CAVI_results
 
 
 def compute_precomputables_dummy(
@@ -63,6 +64,8 @@ def compute_ib_cavi(
     prior_type: PriorType = PriorType.NORMAL,
     hyperparameters: Optional[Hyperparameters] = None,
     shrinkage_grouping_strategy: Optional[ShrinkageGroupingStrategy] = None,
+    save_beta_every_secs: Optional[float] = None,
+    save_beta_dir: Optional[str] = None,
     verbose: bool = True,
 ) -> CAVI_Results:
     """
@@ -167,6 +170,7 @@ def compute_ib_cavi(
 
     ### Start timer
     start_time_for_up_front_computations = time.time()
+    secs_elapsed_at_last_beta_save = 0.0
 
     ### Prepare training data
     design_matrix = construct_design_matrix(
@@ -247,6 +251,8 @@ def compute_ib_cavi(
             elapsed_secs_for_computing_category_probabilities
         )
 
+    secs_elapsed_at_last_beta_save = 0
+
     ### Inference
     n_iterations_so_far = 0
     elbo_stats = ELBO_Stats(
@@ -321,12 +327,23 @@ def compute_ib_cavi(
                 end_time_for_computing_these_cat_probs
                 - start_time_for_computing_these_cat_probs
             )
-        performance_over_time_as_dict["ELBO (mean over N,K)"].append(
-            elbo_stats.mean_elbo
-        )
-        performance_over_time_as_dict["seconds elapsed (category probs)"].append(
-            elapsed_secs_for_computing_category_probabilities
-        )
+
+            performance_over_time_as_dict["ELBO (mean over N,K)"].append(
+                elbo_stats.mean_elbo
+            )
+            performance_over_time_as_dict["seconds elapsed (category probs)"].append(
+                elapsed_secs_for_computing_category_probabilities
+            )
+
+        # save intermediate betas if desired
+        if save_beta_every_secs is not None:
+            if secs_elapsed - secs_elapsed_at_last_beta_save > save_beta_every_secs:
+                units_of_save_every = int(divmod(secs_elapsed, save_beta_every_secs)[0])
+                time_info = f"save_every_secs={save_beta_every_secs}_units_of_save_every={units_of_save_every}_secs_elapsed={secs_elapsed:.03f}"
+                write_VI_params_from_CAVI_results(
+                    CAVI_Results(variational_params, None), save_beta_dir, time_info
+                )
+                secs_elapsed_at_last_beta_save = secs_elapsed
 
         if verbose:
             info_to_display = (
