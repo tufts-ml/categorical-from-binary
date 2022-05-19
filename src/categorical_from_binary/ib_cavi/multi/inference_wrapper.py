@@ -337,7 +337,9 @@ def compute_ib_cavi(
 
         # save intermediate betas if desired
         if save_beta_every_secs is not None:
-            if secs_elapsed - secs_elapsed_at_last_beta_save > save_beta_every_secs:
+            if (
+                secs_elapsed - secs_elapsed_at_last_beta_save > save_beta_every_secs
+            ) or n_iterations_so_far == max_n_iterations:
                 units_of_save_every = int(divmod(secs_elapsed, save_beta_every_secs)[0])
                 time_info = f"save_every_secs={save_beta_every_secs}_units_of_save_every={units_of_save_every}_secs_elapsed={secs_elapsed:.03f}"
                 write_VI_params_from_CAVI_results(

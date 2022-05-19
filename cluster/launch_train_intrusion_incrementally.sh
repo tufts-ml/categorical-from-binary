@@ -15,11 +15,10 @@ fi
 for cyber_user_idx_relative_to_subset_override in {0..50}
 do
     for only_run_this_inference in 1 5
-
-        args='--path_to_configs configs/intrusion_detection/base.yaml
-        --only_run_this_inference '
+    do 
+        args='--path_to_configs configs/intrusion_detection/base.yaml --only_run_this_inference '
         args+=$only_run_this_inference  
-        args+=" --cyber_user_idx_relative_to_subset_override"
+        args+=' --cyber_user_idx_relative_to_subset_override '
         args+=$cyber_user_idx_relative_to_subset_override
 
         export args=$args
