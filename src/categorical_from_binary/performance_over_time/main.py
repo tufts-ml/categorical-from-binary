@@ -48,6 +48,12 @@ def _get_argument_parser():
         default=None,
     )
     parser.add_argument(
+        "--cyber_user_idx_relative_to_subset_override",
+        type=int,
+        help=f"Can be used to override user idx relative to subset when operating on cyber data",
+        default=None,
+    )
+    parser.add_argument(
         "--make_plots",
         type=bool,
         help=f"whether to make plots; defaults to false because will cause code to raise an error if all inf methods not specified",
@@ -58,15 +64,10 @@ def _get_argument_parser():
 
 def run_performance_over_time_from_loaded_configs(
     configs: Configs,
-    only_run_this_inference: Optional[InferenceType] = None,
     make_plots: bool = True,
 ) -> None:
     """
     Arguments:
-
-        only_run_this_inference: Allow us to choose a single inference method to run;
-            this allows us to run many inference methods on the same dataset in parallel
-            (which is useful for larger runs)
         make_plots:  Can set to False if ` only_run_this_inference` is not None, because
             the plotter currently assumes that certain inference methods (e.g. ADVI) are present.
 
@@ -76,11 +77,6 @@ def run_performance_over_time_from_loaded_configs(
         configs = load_configs(path_to_configs)
 
     """
-
-    if only_run_this_inference is not None and make_plots is True:
-        raise NotImplementedError(
-            "We cannot currently make plots if we're not running all the inference types."
-        )
 
     ###
     # Construct dataset
@@ -180,13 +176,12 @@ def run_performance_over_time_from_loaded_configs(
     # Construct directory for saving results
     ###
     mst_time = get_mst_time()
-    inference_used = (
-        "all"
-        if only_run_this_inference is None
-        else f"ONLY_{only_run_this_inference.name}"
-    )
+    inference_used_list = [
+        k for (k, v) in configs.holdout_performance.dict().items() if v is not None
+    ]
+    inference_used_string = "+".join(inference_used_list)
     save_dir_with_purpose_and_subset_and_time_and_inference_used = os.path.join(
-        f"{configs.meta.save_dir}", data_subset, f"{mst_time}_{inference_used}"
+        f"{configs.meta.save_dir}", data_subset, f"{mst_time}_{ inference_used_string}"
     )
     ensure_dir(save_dir_with_purpose_and_subset_and_time_and_inference_used)
 
@@ -200,7 +195,6 @@ def run_performance_over_time_from_loaded_configs(
         labels_test,
         configs.holdout_performance,
         save_dir_with_purpose_and_subset_and_time_and_inference_used,
-        only_run_this_inference,
     )
 
     ###
@@ -255,12 +249,61 @@ def run_performance_over_time_from_loaded_configs(
                 )
 
 
+def update_configs_via_optional_overrides(
+    configs: Configs,
+    only_run_this_inference: Optional[bool],
+    cyber_user_idx_relative_to_subset_override: Optional[int],
+) -> Configs:
+    """
+    Use case is setting overrides to yaml files in command line.
+    These overrides can help with parallelization.
+
+    Arguments:
+        only_run_this_inference: Allow us to choose a single inference method to run;
+            this allows us to run many inference methods on the same dataset in parallel
+            (which is useful for larger runs)
+    """
+    # remove inference types we are not using
+    if only_run_this_inference is not None:
+        only_run_this_inference = InferenceType(only_run_this_inference)
+
+        inference_string_by_inference_type_to_remove = {
+            InferenceType.ADVI: "advi",
+            InferenceType.CAVI_LOGIT: "cavi_logit",
+            InferenceType.CAVI_PROBIT: "cavi_probit",
+            InferenceType.NUTS: "nuts",
+            InferenceType.SOFTMAX_VIA_PGA_AND_GIBBS: "pga_softmax_gibbs",
+        }
+
+        del inference_string_by_inference_type_to_remove[only_run_this_inference]
+        for inference_string in inference_string_by_inference_type_to_remove.values():
+            setattr(configs.holdout_performance, inference_string, None)
+
+    if cyber_user_idx_relative_to_subset_override is not None:
+        configs.data.cyber.user_idx_relative_to_subset = (
+            cyber_user_idx_relative_to_subset_override
+        )
+        user_id = (
+            configs.data.cyber.subset_initial_user_idx_when_sorting_most_to_fewest_events
+            + configs.data.cyber.user_idx_relative_to_subset
+        )
+
+        # configs.data.cyber.subset_initial_user_idx_when_sorting_most_to_fewest_events = subset_initial_user_idx_when_sorting_most_to_fewest_events
+        configs.meta.purpose = f"cyber_for_{configs.data.cyber.subset_initial_user_idx_when_sorting_most_to_fewest_event}_user_in_subset_from_{configs.data.cyber.subset_initial_user_idx_when_sorting_most_to_fewest_events}_to_{configs.data.cyber.subset_initial_user_idx_when_sorting_most_to_fewest_events+configs.data.cyber.subset_number_of_users}"
+        configs.meta.save_dir = os.path.join(configs.meta.save_dir, f"user_{user_id}")
+
+    return configs
+
+
 def run_performance_over_time(
     path_to_configs: str,
     only_run_this_inference: Optional[InferenceType] = None,
+    cyber_user_idx_relative_to_subset_override: Optional[int] = None,
     make_plots: bool = True,
 ) -> None:
     """
+    Run performance over time from yaml configs, but allow some overrides.
+
     Arguments:
         only_run_this_inference: Allow us to choose a single inference method to run;
             this allows us to run many inference methods on the same dataset in parallel
@@ -268,10 +311,15 @@ def run_performance_over_time(
         make_plots:  Can set to False if ` only_run_this_inference` is not None, because
             the plotter currently assumes that certain inference methods (e.g. ADVI) are present.
     """
+    if only_run_this_inference is not None and make_plots is True:
+        raise NotImplementedError(
+            "We cannot currently make plots if we're not running all the inference types."
+        )
     configs = load_configs(path_to_configs)
-    run_performance_over_time_from_loaded_configs(
-        configs, only_run_this_inference, make_plots
+    configs = update_configs_via_optional_overrides(
+        configs, only_run_this_inference, cyber_user_idx_relative_to_subset_override
     )
+    run_performance_over_time_from_loaded_configs(configs, make_plots)
 
 
 if __name__ == "__main__":
@@ -282,13 +330,9 @@ if __name__ == "__main__":
     """
 
     args = _get_argument_parser().parse_args()
-    if args.only_run_this_inference is not None:
-        only_run_this_inference = InferenceType(args.only_run_this_inference)
-    else:
-        only_run_this_inference = None
-
     run_performance_over_time(
         args.path_to_configs,
-        only_run_this_inference,
+        args.only_run_this_inference,
+        args.cyber_user_idx_relative_to_subset_override,
         args.make_plots,
     )

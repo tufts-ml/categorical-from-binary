@@ -1,0 +1,32 @@
+meta:
+  purpose : "cyber_for_46th_user_in_subset_from_300_to_349" # DYNAMIC 
+  save_dir : "./data/results/arxiv_prep/cyber_346/" #DYNAMIC 
+  
+data :
+  cyber:
+    path_to_human_process_start_data :  "/cluster/tufts/hugheslab/mwojno01/data/human_process_starts.csv"  # 1.5 GB
+    subset_initial_user_idx_when_sorting_most_to_fewest_events : 300 
+    subset_number_of_users : 50  #
+    user_idx_relative_to_subset : 46 # DYNAMIC #seems to be an actual human user; accuracy is less than 100% and domain is `DOM1` 
+    window_size : 5 
+    temperature : 60  # one minute
+    include_intercept : True 
+    pct_training : 0.8  
+
+
+holdout_performance:
+  advi:
+    n_iterations : 20
+    seed : 0 
+    lrs :
+      - 1.0 
+    link : 8 # SOFTMAX 
+    # ADD save_beta_every
+
+  cavi_probit:
+    n_iterations:  1000
+    # ADD save_beta_every
+
+plot:
+  min_pct_iterates_with_non_nan_metrics_in_order_to_plot_curve : 0.5 
+  min_log_likelihood_for_y_axis : "random guessing"
