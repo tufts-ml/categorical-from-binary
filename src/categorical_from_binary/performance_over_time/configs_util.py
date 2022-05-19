@@ -59,6 +59,7 @@ class ADVI_Configs(BaseModel):
     seed: int
     link: Link
     lrs: List[float]
+    save_beta_every_secs: Optional[float] = None
 
 
 class PGA_Softmax_Gibbs_Configs(BaseModel):
@@ -69,10 +70,12 @@ class PGA_Softmax_Gibbs_Configs(BaseModel):
 
 class IB_CAVI_Probit_Configs(BaseModel):
     n_iterations: int
+    save_beta_every_secs: Optional[float] = None
 
 
 class IB_CAVI_Logit_Configs(BaseModel):
     n_iterations: int
+    save_beta_every_secs: Optional[float] = None
 
 
 class NUTS_Configs(BaseModel):
@@ -121,7 +124,7 @@ class Configs(BaseModel):
     meta: Meta_Configs
     data: Data_Configs
     holdout_performance: Holdout_Performance_Over_Time_Configs
-    plot: Plotting_Configs
+    plot: Optional[Plotting_Configs] = None
 
 
 ###

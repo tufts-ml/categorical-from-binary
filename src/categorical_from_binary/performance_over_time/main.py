@@ -126,6 +126,7 @@ def run_performance_over_time_from_loaded_configs(
         (
             covariates,
             labels,
+            user_domain,
         ) = construct_process_start_features_and_labels_for_one_cyber_user(
             configs.data.cyber.path_to_human_process_start_data,
             configs.data.cyber.subset_initial_user_idx_when_sorting_most_to_fewest_events,
@@ -134,7 +135,7 @@ def run_performance_over_time_from_loaded_configs(
             configs.data.cyber.window_size,
             configs.data.cyber.temperature,
             configs.data.cyber.include_intercept,
-        )
+        )  # noqa
 
         # Prep training / test split
         n_train_samples = int(configs.data.cyber.pct_training * np.shape(covariates)[0])
@@ -142,6 +143,11 @@ def run_performance_over_time_from_loaded_configs(
         labels_train = labels[:n_train_samples]
         covariates_test = covariates[n_train_samples:]
         labels_test = labels[n_train_samples:]
+
+    ###
+    # Data subset
+    ###
+    data_subset = user_domain if configs.data.cyber is not None else ""
 
     ###
     # Metadata
@@ -171,44 +177,50 @@ def run_performance_over_time_from_loaded_configs(
     print(f"Metadata for this dataset: {metadata}")
 
     ###
-    # Run holdout performance
+    # Construct directory for saving results
     ###
-
-    performance_over_time_results = compute_performance_over_time(
-        covariates_train,
-        labels_train,
-        covariates_test,
-        labels_test,
-        configs.holdout_performance,
-        only_run_this_inference,
-    )
-
-    ###
-    # Save artifacts
-    ###
-
     mst_time = get_mst_time()
     inference_used = (
         "all"
         if only_run_this_inference is None
         else f"ONLY_{only_run_this_inference.name}"
     )
-    save_dir_with_purpose_and_time_and_inference_used = (
-        f"{configs.meta.save_dir}/{mst_time}_{inference_used}/"
+    save_dir_with_purpose_and_subset_and_time_and_inference_used = os.path.join(
+        f"{configs.meta.save_dir}", data_subset, f"{mst_time}_{inference_used}"
     )
-    ensure_dir(save_dir_with_purpose_and_time_and_inference_used)
+    ensure_dir(save_dir_with_purpose_and_subset_and_time_and_inference_used)
+
+    ###
+    # Run holdout performance
+    ###
+    performance_over_time_results = compute_performance_over_time(
+        covariates_train,
+        labels_train,
+        covariates_test,
+        labels_test,
+        configs.holdout_performance,
+        save_dir_with_purpose_and_subset_and_time_and_inference_used,
+        only_run_this_inference,
+    )
+
+    ###
+    # Save other artifacts
+    ###
 
     # Configs
     write_json(
         configs.dict(),
-        os.path.join(save_dir_with_purpose_and_time_and_inference_used, "configs.json"),
+        os.path.join(
+            save_dir_with_purpose_and_subset_and_time_and_inference_used, "configs.json"
+        ),
     )
 
     # Metadata
     write_json(
         metadata.__dict__,
         os.path.join(
-            save_dir_with_purpose_and_time_and_inference_used, "metadata.json"
+            save_dir_with_purpose_and_subset_and_time_and_inference_used,
+            "metadata.json",
         ),
     )
 
@@ -216,18 +228,20 @@ def run_performance_over_time_from_loaded_configs(
     write_performance_over_time_results(
         performance_over_time_results,
         os.path.join(
-            save_dir_with_purpose_and_time_and_inference_used, "result_data_frames"
+            save_dir_with_purpose_and_subset_and_time_and_inference_used,
+            "result_data_frames",
         ),
     )
 
     # Plots
-    if make_plots:
+    if make_plots and configs.plot is not None:
         for show_cb_logit in [True, False]:
             for add_legend_to_plot in [True, False]:
                 plot_performance_over_time_results(
                     performance_over_time_results,
                     os.path.join(
-                        save_dir_with_purpose_and_time_and_inference_used, "plots"
+                        save_dir_with_purpose_and_subset_and_time_and_inference_used,
+                        "plots",
                     ),
                     metadata.mean_log_like_data_generating_process,
                     metadata.accuracy_data_generating_process,

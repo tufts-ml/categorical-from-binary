@@ -1,6 +1,8 @@
 from typing import Tuple
 
-from categorical_from_binary.datasets.cyber.data_frame import load_human_process_start_df
+from categorical_from_binary.datasets.cyber.data_frame import (
+    load_human_process_start_df,
+)
 from categorical_from_binary.datasets.cyber.featurize import (
     construct_features,
     construct_labels,
@@ -22,7 +24,7 @@ def construct_process_start_features_and_labels_for_one_cyber_user(
     window_size: int,
     temperature: float,
     include_intercept: bool,
-) -> Tuple[NumpyArray2D, NumpyArray2D]:
+) -> Tuple[NumpyArray2D, NumpyArray2D, str]:
     """
     The number of processes/categories represented (i.e. the number of columns of the one-hot-encoded `labels`)
     will be given by the number of unique categories launched across a subset of users, which is determined
@@ -64,4 +66,4 @@ def construct_process_start_features_and_labels_for_one_cyber_user(
         temperature,
         include_intercept=include_intercept,
     )
-    return features, labels
+    return features, labels, user_domain

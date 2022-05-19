@@ -6,10 +6,9 @@ import argparse
 import faulthandler
 import os
 
-import numpy as np
-import scipy
-
-from categorical_from_binary.datasets.cyber.data_frame import load_human_process_start_df
+from categorical_from_binary.datasets.cyber.data_frame import (
+    load_human_process_start_df,
+)
 from categorical_from_binary.datasets.cyber.featurize import (
     construct_features,
     construct_labels,
@@ -24,6 +23,10 @@ from categorical_from_binary.ib_cavi.multi.ib_probit.inference.main import (
 )
 from categorical_from_binary.io import ensure_dir, write_json
 from categorical_from_binary.pandas_helpers import keep_df_rows_by_column_values
+from categorical_from_binary.performance_over_time.vi_params import (
+    VI_results_from_CAVI_results,
+    write_VI_results,
+)
 
 
 def _get_argument_parser():
@@ -208,33 +211,12 @@ def train_model(
 
     ensure_dir(save_dir)
 
-    # TODO: save to filepath
-    #   * predictive performance over time  (it's a dataframe)
-
     path_to_meta_data = os.path.join(save_dir, f"{user_domain}_meta_data.json")
     write_json(meta_data_dict, path_to_meta_data)
 
-    path_to_holdout_performance_over_time = os.path.join(
-        save_dir, f"{user_domain}_holdout_performance.csv"
-    )
-    results.performance_over_time.to_csv(path_to_holdout_performance_over_time)
-
-    ### TODO: Write a helper function to simplify the below.
-    beta_mean = results.variational_params.beta.mean
-    if scipy.sparse.issparse(beta_mean):
-        path_to_beta_mean = os.path.join(save_dir, f"{user_domain}_beta_mean.npz")
-        scipy.sparse.save_npz(path_to_beta_mean, beta_mean)
-    else:
-        path_to_beta_mean = os.path.join(save_dir, f"{user_domain}_beta_mean.npy")
-        np.save(path_to_beta_mean, beta_mean)
-
-    beta_cov = results.variational_params.beta.cov
-    if scipy.sparse.issparse(beta_cov):
-        path_to_beta_cov = os.path.join(save_dir, f"{user_domain}_beta_cov.npz")
-        scipy.sparse.save_npz(path_to_beta_cov, beta_cov)
-    else:
-        path_to_beta_cov = os.path.join(save_dir, f"{user_domain}_beta_cov.npy")
-        np.save(path_to_beta_cov, beta_cov)
+    # UNDO this?
+    VI_results = VI_results_from_CAVI_results(results)
+    write_VI_results(VI_results, save_dir, user_domain)
 
 
 if __name__ == "__main__":

@@ -39,11 +39,15 @@ def compute_performance_over_time(
     covariates_test: NumpyArray2D,
     labels_test: NumpyArray2D,
     configs: Holdout_Performance_Over_Time_Configs,
+    save_beta_dir: Optional[str] = None,
     only_run_this_inference: Optional[InferenceType] = None,
 ) -> PerformanceOverTimeResults:
 
     """
     If configs are set to None, then we don't run that thing.
+
+    Arguments:
+        data_subset: e.g., user_domain for cyber.  We want this info when we save stuff.
     """
 
     # Initialization (some of these methods may not be run)
@@ -82,6 +86,8 @@ def compute_performance_over_time(
                 configs.advi.seed,
                 labels_test=labels_test,
                 covariates_test=covariates_test,
+                save_beta_every_secs=configs.advi.save_beta_every_secs,
+                save_beta_dir=save_beta_dir,
             )
             ADVI_results = ADVI_Results(
                 beta_mean_ADVI, beta_stds_ADVI, performance_ADVI
@@ -106,6 +112,8 @@ def compute_performance_over_time(
             variational_params_init=None,
             # convergence_criterion_drop_in_mean_elbo=convergence_criterion_drop_in_mean_elbo,
             max_n_iterations=configs.cavi_probit.n_iterations,
+            save_beta_every_secs=configs.cavi_probit.save_beta_every_secs,
+            save_beta_dir=save_beta_dir,
         )
         performance_cavi_probit = results_CAVI_probit.performance_over_time
         print(f"\n Performance with CAVI probit: {performance_cavi_probit}")
@@ -127,6 +135,8 @@ def compute_performance_over_time(
             variational_params_init=None,
             # convergence_criterion_drop_in_mean_elbo=convergence_criterion_drop_in_mean_elbo,
             max_n_iterations=configs.cavi_logit.n_iterations,
+            save_beta_every_secs=configs.cavi_logit.save_beta_every_secs,
+            save_beta_dir=save_beta_dir,
         )
         performance_cavi_logit = results_CAVI_logit.performance_over_time
         print(f"\n Performance with CAVI probit: {performance_cavi_logit}")
