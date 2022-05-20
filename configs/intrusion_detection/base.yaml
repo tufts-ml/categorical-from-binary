@@ -16,16 +16,16 @@ data :
 
 holdout_performance:
   advi:
-    n_iterations : 300
+    n_iterations : 100
     seed : 0 
     lrs :
       - 1.0 
     link : 8 # SOFTMAX 
-    save_beta_every_secs : 12000
+    save_beta_every_secs : 1200
 
   cavi_probit:
-    n_iterations:  1000
-    save_beta_every_secs : 12000
+    n_iterations:  300
+    save_beta_every_secs : 1200
 
 plot:
   min_pct_iterates_with_non_nan_metrics_in_order_to_plot_curve : 0.5 

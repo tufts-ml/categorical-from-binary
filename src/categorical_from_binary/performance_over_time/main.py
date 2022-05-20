@@ -289,7 +289,7 @@ def update_configs_via_optional_overrides(
         )
 
         # configs.data.cyber.subset_initial_user_idx_when_sorting_most_to_fewest_events = subset_initial_user_idx_when_sorting_most_to_fewest_events
-        configs.meta.purpose = f"cyber_for_{configs.data.cyber.subset_initial_user_idx_when_sorting_most_to_fewest_event}_user_in_subset_from_{configs.data.cyber.subset_initial_user_idx_when_sorting_most_to_fewest_events}_to_{configs.data.cyber.subset_initial_user_idx_when_sorting_most_to_fewest_events+configs.data.cyber.subset_number_of_users}"
+        configs.meta.purpose = f"cyber_for_{configs.data.cyber.subset_initial_user_idx_when_sorting_most_to_fewest_events}_user_in_subset_from_{configs.data.cyber.subset_initial_user_idx_when_sorting_most_to_fewest_events}_to_{configs.data.cyber.subset_initial_user_idx_when_sorting_most_to_fewest_events+configs.data.cyber.subset_number_of_users}"
         configs.meta.save_dir = os.path.join(configs.meta.save_dir, f"user_{user_id}")
 
     return configs
