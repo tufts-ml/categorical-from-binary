@@ -13,7 +13,6 @@ data :
     include_intercept : True 
     pct_training : 0.8  
 
-
 holdout_performance:
   advi:
     n_iterations : 100

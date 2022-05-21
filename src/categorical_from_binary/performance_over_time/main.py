@@ -251,8 +251,8 @@ def run_performance_over_time_from_loaded_configs(
 
 def update_configs_via_optional_overrides(
     configs: Configs,
-    only_run_this_inference: Optional[bool],
-    cyber_user_idx_relative_to_subset_override: Optional[int],
+    only_run_this_inference: Optional[bool] = None,
+    cyber_user_idx_relative_to_subset_override: Optional[int] = None,
 ) -> Configs:
     """
     Use case is setting overrides to yaml files in command line.
