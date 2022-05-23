@@ -112,7 +112,7 @@ def load_beta_mean_and_get_user_domain_for_cyber_user(
     beta_mean_path = os.path.join(total_child_dir, beta_mean_basename)
     if ".npz" in beta_mean_path:
         beta_mean = scipy.sparse.load_npz(beta_mean_path)
-    elif ".py" in beta_mean_path:
+    elif ".npy" in beta_mean_path:
         beta_mean = np.load(beta_mean_path)  # not sure if this works.
     else:
         raise ValueError("I don't know how to load betas.")
