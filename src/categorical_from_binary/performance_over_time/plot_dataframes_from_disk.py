@@ -34,6 +34,9 @@ def make_performance_over_time_plots_from_dataframes_on_disk(
     max_log_likelihood_for_y_axis: Optional[float] = None,
     CBC_name: str = "CBC",
     CBM_name: str = "CBM",
+    SOFTMAX_name: str = "MULTI_LOGIT_NON_IDENTIFIED",
+    nuts_link_name: str = "MULTI_LOGIT_NON_IDENTIFIED",
+    nuts_link_name_formatted_for_legend: str = "Softmax",
 ):
     """
 
@@ -131,4 +134,7 @@ def make_performance_over_time_plots_from_dataframes_on_disk(
                 save_legend_separately=save_legend_separately,
                 CBC_name=CBC_name,
                 CBM_name=CBM_name,
+                SOFTMAX_name=SOFTMAX_name,
+                nuts_link_name=nuts_link_name,
+                nuts_link_name_formatted_for_legend=nuts_link_name_formatted_for_legend,
             )

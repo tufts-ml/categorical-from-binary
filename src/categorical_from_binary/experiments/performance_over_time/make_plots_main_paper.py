@@ -38,6 +38,9 @@ make_performance_over_time_plots_from_dataframes_on_disk(
     max_log_likelihood_for_y_axis,
     CBC_name="DO",
     CBM_name="SDO",
+    SOFTMAX_name="MULTI_LOGIT_NON_IDENTIFIED",
+    nuts_link_name="MULTI_LOGIT_NON_IDENTIFIED",
+    nuts_link_name_formatted_for_legend="Softmax",
 )
 
 
@@ -80,6 +83,9 @@ make_performance_over_time_plots_from_dataframes_on_disk(
     max_log_likelihood_for_y_axis,
     CBC_name="DO",
     CBM_name="SDO",
+    SOFTMAX_name="MULTI_LOGIT_NON_IDENTIFIED",
+    nuts_link_name="MULTI_LOGIT_NON_IDENTIFIED",
+    nuts_link_name_formatted_for_legend="Softmax",
 )
 
 
@@ -118,4 +124,9 @@ make_performance_over_time_plots_from_dataframes_on_disk(
     min_pct_iterates_with_non_nan_metrics_in_order_to_plot_curve,
     min_log_likelihood_for_y_axis,
     max_log_likelihood_for_y_axis,
+    CBC_name="DO",
+    CBM_name="SDO",
+    SOFTMAX_name="MULTI_LOGIT_NON_IDENTIFIED",
+    nuts_link_name="MULTI_LOGIT_NON_IDENTIFIED",
+    nuts_link_name_formatted_for_legend="Softmax",
 )
