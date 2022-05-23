@@ -14,9 +14,9 @@ fi
 
 
 export path_to_configs='configs/intrusion_detection/base.yaml'
-export scoring_results_dir='/cluster/tufts/hugheslab/mwojno01/data/results/intrusion/'
+export scoring_results_dir='/cluster/tufts/hugheslab/mwojno01/data/results/intrusion/cavi_20_mins_vs_advi_100_mins'
 export cavi_time_units=1
-export advi_time_units=10
+export advi_time_units=5
 
 for cyber_user_idx_relative_to_subset_override in {0..50}
 do
