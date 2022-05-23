@@ -48,9 +48,6 @@ def update_performance_results(
             metrics.mean_log_like
         )
         performance_dict[f"{mode} accuracy with {link.name}"].append(metrics.accuracy)
-        performance_dict[f"{mode} balanced accuracy with {link.name}"].append(
-            metrics.balanced_accuracy
-        )
     return performance_dict
 
 

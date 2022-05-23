@@ -29,7 +29,6 @@ class Metrics:
     mean_log_like: Optional[float] = None
     accuracy: Optional[float] = None
     mean_choice_rank: Optional[float] = None
-    balanced_accuracy: Optional[float] = None
 
 
 ###
@@ -150,7 +149,7 @@ def compute_accuracy(probs: NumpyArray2D, labels: NumpyArray2D):
 
 def _compute_balanced_accuracy(probs: NumpyArray2D, labels: NumpyArray2D):
     """
-    Experimental function.
+    Experimental function.  Currently not used.
 
     Reference:
         https://www.michaelchughes.com/papers/HuangEtAl_MLHC_2021.pdf#page=15
@@ -246,14 +245,12 @@ def compute_metrics(
     mean_likelihood = compute_mean_likelihood(probs, labels, min_allowable_prob)
     mean_log_likelihood = compute_mean_log_likelihood(probs, labels, min_allowable_prob)
     accuracy = compute_accuracy(probs, labels)
-    balanced_accuracy = _compute_balanced_accuracy(probs, labels)
     mean_choice_rank = np.mean(compute_choice_ranks(probs, labels))
     return Metrics(
         mean_likelihood,
         mean_log_likelihood,
         accuracy,
         mean_choice_rank,
-        balanced_accuracy,
     )
 
 
