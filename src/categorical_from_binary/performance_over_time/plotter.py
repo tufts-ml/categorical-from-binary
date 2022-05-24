@@ -41,6 +41,8 @@ def plot_performance_over_time(
     save_legend_separately: bool = False,
     CBC_name: str = "CBC",
     CBM_name: str = "CBM",
+    SOFTMAX_name: str = "MULTI_LOGIT_NON_IDENTIFIED",
+    nuts_link_name_formatted_for_legend: str = "Softmax",
     nuts_link_name: str = "SOFTMAX",
 ) -> None:
     """
@@ -57,6 +59,7 @@ def plot_performance_over_time(
             can prevent situations where we give legend entries to curves that are not there.
         CBC_name: Can be set to "DO" for backwards compatability
         CBM_name: Can be set to "SDO" for backwards compatability
+        SOFTMAX_name: Can be set to "MULTI_LOGIT_NON_IDENTIFIED" for backwards compatibility,
         nuts_link_name: Can be set to something other than "SOFTMAX" (which was used in the experiments);
             Need to extend code so we can have various links for other methods too (at least ADVI)
     """
@@ -176,7 +179,9 @@ def plot_performance_over_time(
             secs_advi = perf_advi["seconds elapsed"].to_numpy()
             secs_advi[0] = EPSILON_TO_AVOID_EXACT_ZERO_SECONDS_WHEN_LOGGING
             # TODO: Don't hardcode the link here
-            metric_advi = perf_advi[f"{metric_as_string} with SOFTMAX"].to_numpy()
+            metric_advi = perf_advi[
+                f"{metric_as_string} with {SOFTMAX_name}"
+            ].to_numpy()
             max_metric = np.nanmax([max_metric, np.nanmax(metric_advi)])
             min_metric = np.nanmin([min_metric, np.nanmin(metric_advi)])
             total_n_its = len(metric_advi)
@@ -216,13 +221,10 @@ def plot_performance_over_time(
             ].to_numpy()
             max_metric = np.nanmax([max_metric, np.nanmax(metric_nuts)])
             min_metric = np.nanmin([min_metric, np.nanmin(metric_nuts)])
-            link_name_formatted_for_legend = (
-                nuts_link_name[0].upper() + nuts_link_name[1:].lower()
-            )
             plt.plot(
                 secs_nuts,
                 metric_nuts,
-                label=f"{link_name_formatted_for_legend}+NUTS",
+                label=f"{nuts_link_name_formatted_for_legend}+NUTS",
                 linewidth=4,
                 color=colors_for_other_methods[-1],
                 # alpha=1.0 - 1 / (len(colors_for_other_methods) + 1),
@@ -237,7 +239,9 @@ def plot_performance_over_time(
             secs_gibbs = perf_gibbs["seconds elapsed"].to_numpy()
             # secs_gibbs[0] = EPSILON_TO_AVOID_EXACT_ZERO_SECONDS_WHEN_LOGGING
             # TODO: don't hardcode the link here
-            metric_gibbs = perf_gibbs[f"{metric_as_string} with SOFTMAX"].to_numpy()
+            metric_gibbs = perf_gibbs[
+                f"{metric_as_string} with {SOFTMAX_name}"
+            ].to_numpy()
             max_metric = np.nanmax([max_metric, np.nanmax(metric_gibbs)])
             min_metric = np.nanmin([min_metric, np.nanmin(metric_gibbs)])
             plt.plot(
@@ -398,6 +402,7 @@ def plot_performance_over_time_results(
     save_legend_separately: bool = False,
     CBC_name: str = "CBC",
     CBM_name: str = "CBM",
+    SOFTMAX_name: str = "MULTI_LOGIT_NON_IDENTIFIED",
     nuts_link_name: str = "SOFTMAX",
 ):
     # convert advi_results_by_lr to df_performance_advi_by_lr
@@ -427,5 +432,6 @@ def plot_performance_over_time_results(
         save_legend_separately,
         CBC_name=CBC_name,
         CBM_name=CBM_name,
+        SOFTMAX_name=SOFTMAX_name,
         nuts_link_name=nuts_link_name,
     )

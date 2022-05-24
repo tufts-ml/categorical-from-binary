@@ -546,7 +546,7 @@ def do_advi_inference_via_kucukelbir_algo(
             if (
                 secs_elapsed_for_advi_iterations - secs_elapsed_at_last_beta_save
                 > save_beta_every_secs
-            ):
+            ) or (it == n_advi_iterations):
                 units_of_save_every = int(
                     divmod(secs_elapsed_for_advi_iterations, save_beta_every_secs)[0]
                 )

@@ -29,7 +29,6 @@ class Metrics:
     mean_log_like: Optional[float] = None
     accuracy: Optional[float] = None
     mean_choice_rank: Optional[float] = None
-    balanced_accuracy: Optional[float] = None
 
 
 ###
@@ -148,8 +147,10 @@ def compute_accuracy(probs: NumpyArray2D, labels: NumpyArray2D):
     return np.mean(accuracy_status_per_observation)
 
 
-def compute_balanced_accuracy(probs: NumpyArray2D, labels: NumpyArray2D):
+def _compute_balanced_accuracy(probs: NumpyArray2D, labels: NumpyArray2D):
     """
+    Experimental function.  Currently not used.
+
     Reference:
         https://www.michaelchughes.com/papers/HuangEtAl_MLHC_2021.pdf#page=15
 
@@ -159,35 +160,35 @@ def compute_balanced_accuracy(probs: NumpyArray2D, labels: NumpyArray2D):
         labels: np.ndarray  with shape: (n_samples, n_categories)
             Each row has exactly one 1.
     """
-    number_of_examples_selecting_each_category = np.sum(labels, 0)
-    booleans_giving_attainment_of_max_cat_prob = probs == probs.max(1, keepdims=True)
-    num_cats_with_max_cat_prob = np.sum(booleans_giving_attainment_of_max_cat_prob, 1)
+    try:
+        number_of_examples_selecting_each_category = np.sum(labels, 0)
+        booleans_giving_attainment_of_max_cat_prob = probs == probs.max(
+            1, keepdims=True
+        )
+        num_cats_with_max_cat_prob = np.sum(
+            booleans_giving_attainment_of_max_cat_prob, 1
+        )
 
-    if scipy.sparse.issparse(labels):
-        labels = labels.astype(bool).todense()
+        if scipy.sparse.issparse(labels):
+            labels = labels.astype(bool).todense()
 
-    booleans_stating_whether_choice_attained_max_cat_prob = (
-        booleans_giving_attainment_of_max_cat_prob & labels
-    )
-    adjusted_true_positive_status = (
-        booleans_stating_whether_choice_attained_max_cat_prob
-        / num_cats_with_max_cat_prob[:, np.newaxis]
-    )
-    # `adjusted_true_positive_status` gives 1/S rather than 1 if S different categories tied for the maximum cat prob for that example
-    adjusted_accuracy_per_category = (
-        np.sum(adjusted_true_positive_status, 0)
-        / number_of_examples_selecting_each_category
-    )
-    # categories with no examples selecting that category are ignored.
-    return np.nanmean(adjusted_accuracy_per_category)
-
-    # choices_have_max_cat_prob = np.argmax(probs, 1) == np.argmax(labels, 1)
-    # num_cats_with_max_cat_prob = np.sum(probs == probs.max(1, keepdims=True), 1)
-    # # if two labels attained the maximum cat probability, the accuracy status is 1/2 rather than 1.
-    # accuracy_status_per_observation = (
-    #     choices_have_max_cat_prob / num_cats_with_max_cat_prob
-    # )
-    # return np.mean(accuracy_status_per_observation)
+        booleans_stating_whether_choice_attained_max_cat_prob = (
+            booleans_giving_attainment_of_max_cat_prob & labels
+        )
+        adjusted_true_positive_status = (
+            booleans_stating_whether_choice_attained_max_cat_prob
+            / num_cats_with_max_cat_prob[:, np.newaxis]
+        )
+        # `adjusted_true_positive_status` gives 1/S rather than 1 if S different categories tied for the maximum cat prob for that example
+        adjusted_accuracy_per_category = (
+            np.sum(adjusted_true_positive_status, 0)
+            / number_of_examples_selecting_each_category
+        )
+        # categories with no examples selecting that category are ignored.
+        balanced_accuracy = np.nanmean(adjusted_accuracy_per_category)
+    except:
+        balanced_accuracy = np.nan
+    return balanced_accuracy
 
 
 ###
@@ -244,14 +245,12 @@ def compute_metrics(
     mean_likelihood = compute_mean_likelihood(probs, labels, min_allowable_prob)
     mean_log_likelihood = compute_mean_log_likelihood(probs, labels, min_allowable_prob)
     accuracy = compute_accuracy(probs, labels)
-    balanced_accuracy = compute_balanced_accuracy(probs, labels)
     mean_choice_rank = np.mean(compute_choice_ranks(probs, labels))
     return Metrics(
         mean_likelihood,
         mean_log_likelihood,
         accuracy,
         mean_choice_rank,
-        balanced_accuracy,
     )
 
 

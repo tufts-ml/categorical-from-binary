@@ -1,0 +1,31 @@
+meta:
+  purpose : "WILL_BE_OVERRIDEN_BY_COMMAND_LINE_ARG_TO_INCLUDE_CYBER_USER_INDEX"
+  save_dir : "/cluster/tufts/hugheslab/mwojno01/data/intrusion/" # Command line arg will add cyber user index 
+  
+data :
+  cyber:
+    path_to_human_process_start_data :  "/cluster/tufts/hugheslab/mwojno01/data/human_process_starts.csv"  # 1.5 GB
+    subset_initial_user_idx_when_sorting_most_to_fewest_events : 300 
+    subset_number_of_users : 50  # MAKE DYNAMIC?
+    user_idx_relative_to_subset : 999 # Will be overriden by command line arg  #TODO: want to only get `DOM1` users! 
+    window_size : 5 
+    temperature : 60  # one minute
+    include_intercept : True 
+    pct_training : 0.8  
+
+holdout_performance:
+  advi:
+    n_iterations : 100
+    seed : 0 
+    lrs :
+      - 1.0 
+    link : 8 # SOFTMAX 
+    save_beta_every_secs : 1200
+
+  cavi_probit:
+    n_iterations:  300
+    save_beta_every_secs : 1200
+
+plot:
+  min_pct_iterates_with_non_nan_metrics_in_order_to_plot_curve : 0.5 
+  min_log_likelihood_for_y_axis : "random guessing"

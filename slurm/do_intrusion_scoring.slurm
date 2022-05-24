@@ -10,10 +10,15 @@
 # Not loading the conda environent, because as per Kyle Heuton, shell jobs should inherit
 # the environment from the process that launched it.  Hence, `conda activate` shouldn't be necessary
 
-echo "Now running script with args:"
-echo $args
+echo "Now running script."
 
-python src/categorical_from_binary/performance_over_time/main.py  $args  
+# Pass along all ENV variables as arguments to my Python script
+python src/categorical_from_binary/experiments/intrusion_detection/round_robin.py \
+    --path_to_configs $path_to_configs\
+    --cyber_user_idx_relative_to_subset_override $cyber_user_idx_relative_to_subset_override\
+    --scoring_results_dir $scoring_results_dir\
+    --cavi_time_units $cavi_time_units\
+    --advi_time_units $advi_time_units
 
 # Usage:
 #  args='--path_to_configs configs/performance_over_time/demo_sims.yaml --only_run_this_inference 1' bash slurm/do_performance_over_time.slurm

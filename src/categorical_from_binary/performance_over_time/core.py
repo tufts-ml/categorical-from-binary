@@ -17,7 +17,6 @@ from categorical_from_binary.kucukelbir.inference import (
     do_advi_inference_via_kucukelbir_algo,
 )
 from categorical_from_binary.performance_over_time.classes import (
-    InferenceType,
     PerformanceOverTimeResults,
 )
 from categorical_from_binary.performance_over_time.configs_util import (
@@ -40,7 +39,6 @@ def compute_performance_over_time(
     labels_test: NumpyArray2D,
     configs: Holdout_Performance_Over_Time_Configs,
     save_beta_dir: Optional[str] = None,
-    only_run_this_inference: Optional[InferenceType] = None,
 ) -> PerformanceOverTimeResults:
 
     """
@@ -60,9 +58,7 @@ def compute_performance_over_time(
     ###
     # ADVI
     ###
-    if configs.advi is not None and (
-        only_run_this_inference is None or only_run_this_inference == InferenceType.ADVI
-    ):
+    if configs.advi is not None:
 
         N, M = np.shape(covariates_train)
         K = np.shape(labels_train)[1]
@@ -98,10 +94,7 @@ def compute_performance_over_time(
     ####
     # Variational Inference with multiclass probit regression
     ####
-    if configs.cavi_probit is not None and (
-        only_run_this_inference is None
-        or only_run_this_inference == InferenceType.CAVI_PROBIT
-    ):
+    if configs.cavi_probit is not None:
 
         results_CAVI_probit = compute_ib_cavi_with_normal_prior(
             IB_Model.PROBIT,
@@ -121,10 +114,7 @@ def compute_performance_over_time(
     ####
     # Variational Inference with multiclass logit regression
     ####
-    if configs.cavi_logit is not None and (
-        only_run_this_inference is None
-        or only_run_this_inference == InferenceType.CAVI_LOGIT
-    ):
+    if configs.cavi_logit is not None:
 
         results_CAVI_logit = compute_ib_cavi_with_normal_prior(
             IB_Model.LOGIT,
@@ -144,9 +134,7 @@ def compute_performance_over_time(
     ####
     # NUTS
     ####
-    if configs.nuts is not None and (
-        only_run_this_inference is None or only_run_this_inference == InferenceType.NUTS
-    ):
+    if configs.nuts is not None:
         n_train_samples = np.shape(labels_train)[0]
         Nseen_list = [n_train_samples]
         beta_samples_NUTS_dict, time_for_NUTS = time_me(run_nuts_on_categorical_data)(
@@ -179,10 +167,7 @@ def compute_performance_over_time(
     # Gibbs Softmax with PGA
     ###
 
-    if configs.pga_softmax_gibbs is not None and (
-        only_run_this_inference is None
-        or only_run_this_inference == InferenceType.SOFTMAX_VIA_PGA_AND_GIBBS
-    ):
+    if configs.pga_softmax_gibbs is not None:
 
         ## inference
         beta_samples_gibbs_with_warmup, time_for_gibbs_with_warmup = time_me(
