@@ -6,12 +6,14 @@ import os
 import matplotlib
 import numpy as np
 import pandas as pd
-
-# from matplotlib import colors
 from matplotlib import pyplot as plt
 
 
 matplotlib.rc_file_defaults()
+import seaborn as sns
+
+
+sns.set(style="whitegrid")
 
 
 def model_user_domain_from_basename(basename):
@@ -92,16 +94,22 @@ for cavi_or_advi_string in ["cavi", "advi"]:
 
 
 ###
-# Plot
+# Intrusion detection metric
 ###
-# configs
-
-# compute metric
 
 methods = ["advi", "cavi"]
-method_labels = ["ADVI (200 min)", "IB-CAVI (20 min)"]
-N_users = len(list(active_directory_mean_log_likes_by_method.values())[0])
+method_labels = ["Softmax+ADVI [200 min]", "CB-Probit+IB-CAVI [20 min]"]
+# method_labels = ["ADVI (3 hr 20 min)", "IB-CAVI (20 min)"]
+# try to match color and alpha of perf over time plot
+color_for_advi = sns.color_palette(palette="BuPu", n_colors=4)[3]
+color_for_cavi = sns.color_palette(palette="YlOrRd", n_colors=2)[-1]
+colors = [color_for_advi, color_for_cavi]
 
+alpha_for_advi = 0.5
+alpha_for_cavi = 1.0
+alphas = [alpha_for_advi, alpha_for_cavi]
+
+N_users = len(list(active_directory_mean_log_likes_by_method.values())[0])
 metrics = np.zeros((N_users, 2))
 for (m, method) in enumerate(methods):
     values = active_directory_mean_log_likes_by_method[method]
@@ -111,22 +119,43 @@ for (m, method) in enumerate(methods):
         values_for_model_without_self = np.delete(values_for_model, u)
         metrics[u, m] = self_score - np.mean(values_for_model_without_self)
 
-indices_sorted = np.argsort(metrics[:, 0])
+indices_sorted = np.argsort(metrics[:, 1])
 metrics_sorted = metrics[np.ix_(indices_sorted, [0, 1])]
 
 
-cmap = "RdBu_r"  #'RdYlGn' # 'RdBu_r'  # matplotlib.cm.viridis
-fig, ax = plt.subplots(1, 1, figsize=(8, 2), squeeze=True, constrained_layout=True)
+###
+# PLot
+###
+fig, ax = plt.subplots(1, 1, figsize=(8, 8), squeeze=True, constrained_layout=True)
 # my_norm=colors.TwoSlopeNorm(vcenter=0)
 # im = ax.imshow(metrics_sorted.T, cmap=cmap, norm=my_norm)
-im = ax.imshow(metrics_sorted.T, cmap=cmap)
+for i in [1, 0]:
+    plt.plot(
+        np.arange(1, N_users + 1),
+        metrics_sorted[:, i],
+        label=method_labels[i],
+        linewidth=4,
+        color=colors[i],
+        alpha=alphas[i],
+    )
 
-bar = plt.colorbar(im)
-bar.set_label("Intrusion Detection Score")
-plt.xlabel("Model owner")
-plt.ylabel("Method")
-ax.set_yticks([0, 1])
-ax.set_yticklabels(method_labels)
+# add legend
+legend = plt.legend(
+    shadow=True,
+    fancybox=True,
+    # bbox_to_anchor=(1, 0.5, 0.3, 0.2),
+    loc="upper left",
+    borderaxespad=0,
+    fontsize=24,
+)
+
+
+plt.xlabel("User model", fontsize=32)
+plt.ylabel("Intrusion Detection Score", fontsize=32)
+plt.xticks(fontsize=24)
+plt.yticks(fontsize=24)
+ax.set_xticks([1, 8, 16, 24, 32])
+ax.set_xticklabels([1, 8, 16, 24, 32])
 plt.show()
 
 ###
