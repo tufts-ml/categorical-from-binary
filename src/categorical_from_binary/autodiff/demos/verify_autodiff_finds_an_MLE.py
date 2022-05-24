@@ -72,7 +72,7 @@ dataset = generate_multiclass_regression_dataset(
 # EXPERIMENT 1 #
 ################
 beta_init = np.zeros((dgc.n_features + 1, dgc.n_categories))
-n_random_inits = 5
+n_random_inits = 25
 
 # CBC-Probit Experiment
 print(f"\n---- Now running CBC-Probit experiment with {n_random_inits} inits. ----\n")
