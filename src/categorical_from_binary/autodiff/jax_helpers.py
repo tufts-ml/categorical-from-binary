@@ -1,5 +1,5 @@
 from functools import partial
-from typing import Callable
+from typing import Callable, Tuple
 
 import jax.numpy as jnp
 import numpy as np
@@ -142,14 +142,14 @@ def compute_training_loss_with_beta_flattened(
     )
 
 
-def optimize_beta(
+def optimize_beta_and_return_beta_star_and_loss(
     beta: jnp.array,
     X: jnp.array,
     y: jnp.array,
     category_probability_function: Callable,
     is_truly_categorical: bool,
     verbose: bool = True,
-) -> np.array:
+) -> Tuple[np.array, float]:
     """
     Arguments:
         beta: MxK
@@ -175,6 +175,7 @@ def optimize_beta(
         args=(M, K, X, y, category_probability_function, is_truly_categorical),
         method="BFGS",
     )
+    train_loss = result.fun.tolist()
     beta_star_flattened = result.x
     beta_star = jnp.reshape(beta_star_flattened, (M, K))
 
@@ -186,7 +187,29 @@ def optimize_beta(
             f"New predictions (first five samples):{category_probability_function(beta_star,X)[:5]}"
         )
 
-    return np.array(beta_star)
+    return np.array(beta_star), train_loss
+
+
+def optimize_beta(
+    beta: jnp.array,
+    X: jnp.array,
+    y: jnp.array,
+    category_probability_function: Callable,
+    is_truly_categorical: bool,
+    verbose: bool = True,
+) -> np.array:
+    """
+    Arguments:
+        beta: MxK
+        X: NxM
+        y: NxK (one-hot encoded)
+        category_probability_function: Callable
+            arguments are beta and X, returns NxK category probabilities
+    """
+    beta_star, loss = optimize_beta_and_return_beta_star_and_loss(
+        beta, X, y, category_probability_function, is_truly_categorical, verbose
+    )
+    return beta_star
 
 
 optimize_beta_for_IB_model = partial(
