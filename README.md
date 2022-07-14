@@ -2,10 +2,10 @@
 
 Welcome to `categorical_from_binary`, a Python code package that lets you perform fast Bayesian inference on linear models for categorical data.
 
-Our methods have three main advantages:
+Our methods have two main advantages:
 
-* they are **simple**: We use an independent Binary approximation that makes inference "easy" using well-known Bayesian methods for binary outcomes
-* they are **scalable** : Our code can handle hundreds or thousands of categories
+* **simplicity**: We use an independent Binary approximation that makes inference "easy" using well-known Bayesian methods for binary outcomes
+* **scalability** : Our code can handle hundreds or thousands of categories easily
 
 This is the code repository for our ICML 2022 paper:
 
