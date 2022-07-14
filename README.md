@@ -1,7 +1,23 @@
 # categorical\_from\_binary
 
-Welcome to categorical\_from\_binary. 
+Welcome to `categorical_from_binary`, a Python code package that lets you perform fast Bayesian inference on linear models for categorical data.
 
+Our methods have three main advantages:
+
+* they are **simple**: We use an independent Binary approximation that makes inference "easy" using well-known Bayesian methods for binary outcomes
+* they are **scalable** : Our code can handle hundreds or thousands of categories
+
+This is the code repository for our ICML 2022 paper:
+
+Easy Variational Inference for Categorical Models via an Independent Binary Approximation
+<br />Michael T Wojnowicz, Shuchin Aeron, Eric L Miller, Michael Hughes
+<br />Proceedings of the 39th International Conference on Machine Learning (ICML), 2022
+<br /><https://proceedings.mlr.press/v162/wojnowicz22a.html>
+
+You can use this repo to:
+
+* reproduce the accuracy-over-time experiments in the paper
+* run our categorical-from-binary models on your own data
 
 # Installation
 
@@ -84,4 +100,9 @@ results = compute_ib_cavi_with_normal_prior(
 
 # References
 
-TBD
+If you use this package in your research, please cite our paper:
+
+Easy Variational Inference for Categorical Models via an Independent Binary Approximation
+<br />Michael T Wojnowicz, Shuchin Aeron, Eric L Miller, Michael Hughes
+<br />Proceedings of the 39th International Conference on Machine Learning (ICML), 2022
+<br /><https://proceedings.mlr.press/v162/wojnowicz22a.html>
