@@ -53,7 +53,7 @@ path_to_configs = "configs/performance_over_time/demo_sims.yaml"
 run_performance_over_time(path_to_configs)
 ```
 
-First, we simulate categorical regression data from a softmax model.  
+For a quick illustration, we simulate a small categorical regression dataset from a softmax model.  
 
 Then we do approximate Bayesian inference.    
 
@@ -61,13 +61,13 @@ Then we do approximate Bayesian inference.
 
  * IB-CAVI (Independent Binary - Coordinate Ascent Variational Inference).
 
-   This method uses categorical-from-binary likelihoods, which have natural independent binary approximations.  
+   This method uses categorical-from-binary (CB) likelihoods, which have natural independent binary approximations.  In particular, we consider the CB-Logit and CB-Probit likelihoods.
 
-2. For baseline methods, we fit the softmax likelihood to this data using:
- 
+2. For baseline methods, we fit the softmax likelihood using three different inference strategies:
+
+ * Automatic differentiation variational inference (ADVI) 
  * NUTS (No U-Turn Sampler)
  * Gibbs sampling (via Polya-Gamma augmentation)
- * Automatic differentiation variational inference.
 
 The code will automatically write holdout-performance-over-time plots to `data/results/demo_sims/`.  The plots will look like this:
 
@@ -98,6 +98,8 @@ results = compute_ib_cavi_with_normal_prior(
     convergence_criterion_drop_in_mean_elbo=0.01,
 )
 ```
+
+If you have any questions, feel free to email [Michael Wojnowicz](https://mikewojnowicz.github.io/).  (Link to email address can be found on that page.)
 
 
 # References
