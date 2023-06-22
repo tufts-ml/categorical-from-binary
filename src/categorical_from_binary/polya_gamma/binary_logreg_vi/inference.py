@@ -2,7 +2,9 @@ from typing import NamedTuple
 
 import numpy as np
 
-from categorical_from_binary.data_generation.bayes_binary_reg import BinaryRegressionDataset
+from categorical_from_binary.data_generation.bayes_binary_reg import (
+    BinaryRegressionDataset,
+)
 from categorical_from_binary.data_generation.util import (
     prepend_features_with_column_of_all_ones_for_intercept,
 )
@@ -10,7 +12,9 @@ from categorical_from_binary.polya_gamma.binary_logreg_vi.util import (
     compute_log_abs_det,
     compute_matrix_inverse,
 )
-from categorical_from_binary.polya_gamma.polya_gamma import compute_polya_gamma_expectation
+from categorical_from_binary.polya_gamma.polya_gamma import (
+    compute_polya_gamma_expectation,
+)
 from categorical_from_binary.types import NumpyArray1D, NumpyArray2D
 
 
@@ -34,7 +38,7 @@ def compute_expected_value_of_c_parameter_for_polya_gamma(
     quadratic_forms = np.array(
         [np.transpose(x_i) @ variational_cov_beta @ x_i for x_i in features]
     )
-    expected_natural_parameters = quadratic_forms + expected_linear_predictors ** 2
+    expected_natural_parameters = quadratic_forms + expected_linear_predictors**2
     return np.sqrt(expected_natural_parameters)
 
 
@@ -134,6 +138,7 @@ def run_polya_gamma_variational_inference_for_bayesian_logistic_regression(
     max_n_iterations: float = np.inf,
     convergence_criterion_drop_in_elbo: float = -np.inf,
     verbose: bool = False,
+    prepend_features_with_column_of_all_ones: bool = True,
 ) -> VariationalParameters:
     """
     Use variational inference with polya gamma augementation to approximate the posterior mean and covariance
@@ -152,7 +157,12 @@ def run_polya_gamma_variational_inference_for_bayesian_logistic_regression(
     # initialization
     prior_mean, prior_cov = prior_params
     prior_precision = np.linalg.inv(prior_cov)
-    features = prepend_features_with_column_of_all_ones_for_intercept(dataset.features)
+    if prepend_features_with_column_of_all_ones:
+        features = prepend_features_with_column_of_all_ones_for_intercept(
+            dataset.features
+        )
+    else:
+        features = dataset.features
     features_transposed = np.transpose(features)
     kappa = dataset.labels - 0.5
 
@@ -167,7 +177,7 @@ def run_polya_gamma_variational_inference_for_bayesian_logistic_regression(
     ) if verbose else None
     print(f"\nTrue beta: {dataset.beta}\n") if verbose else None
     while (
-        n_iterations_so_far <= max_n_iterations
+        n_iterations_so_far < max_n_iterations
         and drop_in_elbo >= convergence_criterion_drop_in_elbo
     ):
         expected_c_parameters = compute_expected_value_of_c_parameter_for_polya_gamma(
@@ -190,9 +200,7 @@ def run_polya_gamma_variational_inference_for_bayesian_logistic_regression(
         variational_params = VariationalParameters(
             variational_mean_beta, variational_cov_beta
         )
-        features = prepend_features_with_column_of_all_ones_for_intercept(
-            dataset.features
-        )
+
         elbo = compute_elbo(
             features,
             dataset.labels,
