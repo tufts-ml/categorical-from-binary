@@ -5,7 +5,7 @@ Welcome to `categorical_from_binary`, a Python code package that lets you perfor
 This is the code repository for our ICML 2022 paper:
 
 Easy Variational Inference for Categorical Models via an Independent Binary Approximation
-<br />Michael T Wojnowicz, Shuchin Aeron, Eric L Miller, Michael C. Hughes
+<br />[Michael T Wojnowicz](https://mikewojnowicz.github.io/), Shuchin Aeron, Eric L Miller, Michael C. Hughes
 <br />Proceedings of the 39th International Conference on Machine Learning (ICML), 2022
 <br /><https://proceedings.mlr.press/v162/wojnowicz22a.html> &#8226; <https://arxiv.org/abs/2206.00093>
 
